@@ -137,3 +137,13 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Astro generated files
+.astro/
+
+# Additional package manager logs
+pnpm-debug.log*
+
+# local IDE caches
+.idea/
+.DS_Store

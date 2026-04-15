@@ -1,0 +1,172 @@
+---
+import '../styles/app.css';
+---
+
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Jexon Content Composer</title>
+	</head>
+	<body>
+		<main>
+			<header class="hero">
+				<h1>Jexon Content Composer</h1>
+				<p>
+					Build reusable field modules, create content entries from those modules, convert rich text to a stable JSON format,
+					and publish your final bundle locally or to S3.
+				</p>
+			</header>
+
+			<section class="grid">
+				<section class="panel modules">
+					<h2>1) Module Builder</h2>
+					<p>Modules are exportable/importable with versioned JSON (`module-1`).</p>
+					<div class="cols-2">
+						<label class="stack" for="module-id">
+							<span>Module ID</span>
+							<input id="module-id" placeholder="blog_post" />
+						</label>
+						<label class="stack" for="module-name">
+							<span>Module Name</span>
+							<input id="module-name" placeholder="Blog Post" />
+						</label>
+					</div>
+					<label class="stack" for="module-description">
+						<span>Description</span>
+						<input id="module-description" placeholder="Used for long-form blog posts" />
+					</label>
+
+					<h3>Field Draft</h3>
+					<div class="cols-2">
+						<label class="stack" for="field-id">
+							<span>Field ID</span>
+							<input id="field-id" placeholder="title" />
+						</label>
+						<label class="stack" for="field-label">
+							<span>Field Label</span>
+							<input id="field-label" placeholder="Title" />
+						</label>
+					</div>
+					<div class="cols-2">
+						<label class="stack" for="field-type">
+							<span>Field Type</span>
+							<select id="field-type"></select>
+						</label>
+						<label class="stack" for="field-help">
+							<span>Help Text (optional)</span>
+							<input id="field-help" placeholder="Displayed below the field" />
+						</label>
+					</div>
+					<label class="toggle" for="field-required">
+						<input id="field-required" type="checkbox" />
+						<span>Required</span>
+					</label>
+					<div class="row">
+						<button id="add-field-btn" type="button">Add Field</button>
+						<button id="clear-fields-btn" type="button">Clear Fields</button>
+					</div>
+					<div id="draft-field-list" class="chip-list"></div>
+					<div class="row">
+						<button id="save-module-btn" type="button">Save Module</button>
+						<button id="reset-module-btn" type="button">Reset Form</button>
+					</div>
+
+					<h3>Module Import / Export</h3>
+					<label class="stack" for="module-import">
+						<span>Module JSON</span>
+						<textarea id="module-import" rows="8" placeholder='{"schemaVersion":"module-1", ...}'></textarea>
+					</label>
+					<div class="row">
+						<button id="import-module-btn" type="button">Import Module JSON</button>
+					</div>
+					<div id="module-list" class="card-list"></div>
+				</section>
+
+				<section class="panel entries">
+					<h2>2) Entry Builder</h2>
+					<p>Create content entries using any saved module. `richText` now has a visual toolbar editor, and `file` supports upload payloads.</p>
+					<label class="stack" for="entry-module-select">
+						<span>Select Module</span>
+						<select id="entry-module-select">
+							<option value="">Select a module</option>
+						</select>
+					</label>
+					<label class="stack" for="entry-title">
+						<span>Entry Title</span>
+						<input id="entry-title" placeholder="My first article" />
+					</label>
+					<div id="entry-field-container"></div>
+					<div class="row">
+						<button id="add-entry-btn" type="button">Add Entry</button>
+					</div>
+
+					<h3>Saved Entries</h3>
+					<div id="entry-list" class="card-list"></div>
+				</section>
+
+				<section class="panel publish">
+					<h2>3) Publish</h2>
+					<p>The final output is generated as versioned JSON (`bundle-1`) with normalized rich text documents and optional S3 uploads.</p>
+					<div class="cols-2">
+						<label class="toggle" for="publish-upload-s3">
+							<input id="publish-upload-s3" type="checkbox" />
+							<span>Upload to S3</span>
+						</label>
+						<label class="stack" for="publish-s3-prefix">
+							<span>S3 Key Prefix</span>
+							<input id="publish-s3-prefix" value="published" />
+						</label>
+					</div>
+					<div class="cols-2">
+						<label class="stack" for="publish-s3-bucket">
+							<span>S3 Bucket</span>
+							<input id="publish-s3-bucket" placeholder="my-content-bucket" />
+						</label>
+						<label class="stack" for="publish-s3-region">
+							<span>S3 Region</span>
+							<input id="publish-s3-region" placeholder="us-east-1" />
+						</label>
+					</div>
+					<div class="cols-2">
+						<label class="stack" for="publish-s3-access-key">
+							<span>S3 Access Key ID</span>
+							<input id="publish-s3-access-key" placeholder="AKIA..." />
+						</label>
+						<label class="stack" for="publish-s3-secret-key">
+							<span>S3 Secret Access Key</span>
+							<input id="publish-s3-secret-key" type="password" placeholder="••••••••" />
+						</label>
+					</div>
+					<div class="cols-2">
+						<label class="stack" for="publish-s3-endpoint">
+							<span>S3 Endpoint (optional)</span>
+							<input id="publish-s3-endpoint" placeholder="https://s3.amazonaws.com" />
+						</label>
+						<label class="stack" for="publish-s3-public-base-url">
+							<span>Public Base URL (optional)</span>
+							<input id="publish-s3-public-base-url" placeholder="https://cdn.example.com" />
+						</label>
+					</div>
+					<label class="toggle" for="publish-s3-force-path-style">
+						<input id="publish-s3-force-path-style" type="checkbox" />
+						<span>Use S3 path-style URLs</span>
+					</label>
+					<div class="row">
+						<button id="publish-btn" type="button">Build Final JSON</button>
+						<button id="clear-storage-btn" type="button" class="danger">Clear Local Data</button>
+					</div>
+					<p id="publish-status" class="status" data-state="info"></p>
+					<label class="stack" for="publish-output">
+						<span>Published JSON</span>
+						<textarea id="publish-output" class="output" rows="16" readonly></textarea>
+					</label>
+				</section>
+			</section>
+		</main>
+		<script src="../scripts/app.ts"></script>
+	</body>
+</html>
