@@ -1,0 +1,104 @@
+---
+import '../styles/app.css';
+
+const siteTitle = 'About Jexon | Content Composer';
+const siteDescription =
+	'Learn about Jexon Content Composer, its workflow for modules and entries, and how it helps teams publish structured JSON content efficiently.';
+const siteKeywords = 'About Jexon, content composer, structured JSON workflow, module builder, entry builder';
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : undefined;
+---
+
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{siteTitle}</title>
+		<meta name="description" content={siteDescription} />
+		<meta name="keywords" content={siteKeywords} />
+		<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={siteTitle} />
+		<meta property="og:description" content={siteDescription} />
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:title" content={siteTitle} />
+		<meta property="twitter:description" content={siteDescription} />
+		{canonical && <link rel="canonical" href={canonical} />}
+		<script is:inline>
+			(function () {
+				try {
+					var k = 'jexon.theme.v1';
+					var t = localStorage.getItem(k);
+					var el = document.documentElement;
+					if (t === 'dark' || t === 'light') {
+						el.setAttribute('data-theme', t);
+					} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+						el.setAttribute('data-theme', 'dark');
+					} else {
+						el.setAttribute('data-theme', 'light');
+					}
+					el.style.colorScheme = el.getAttribute('data-theme') || 'light';
+				} catch (e) {}
+			})();
+		</script>
+	</head>
+	<body>
+		<div class="app-shell">
+			<div class="app-main">
+				<header class="app-topbar">
+					<h1 class="topbar-title">Jexon</h1>
+					<div class="topbar-actions">
+						<a class="topbar-link" href="/" aria-label="Back to Home">Home</a>
+						<button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Light / dark theme">
+							<svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<circle cx="12" cy="12" r="4"></circle>
+								<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+							</svg>
+							<svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+							</svg>
+						</button>
+					</div>
+				</header>
+
+				<div class="app-content">
+					<section class="panel about-panel">
+						<h2>About Jexon</h2>
+						<p>
+							Jexon Content Composer is a structured content workflow tool for building modules, capturing entries, and exporting versioned JSON for publishing pipelines.
+						</p>
+						<p>
+							The editor supports rich text and optional S3-backed asset workflows, making it easier to move from draft content to production-ready bundles with predictable schemas.
+						</p>
+						<div class="row">
+							<a href="/" class="btn--ghost about-back-link">← Back to Home</a>
+						</div>
+					</section>
+					<footer class="site-footer">
+						<p>
+							Powered By <a href="https://github.com/aliesm-com" target="_blank" rel="noopener noreferrer">AliESM</a>
+						</p>
+					</footer>
+				</div>
+			</div>
+		</div>
+		<script is:inline>
+			(function () {
+				var btn = document.getElementById('theme-toggle');
+				if (!btn) return;
+				btn.addEventListener('click', function () {
+					var root = document.documentElement;
+					var current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+					var next = current === 'dark' ? 'light' : 'dark';
+					root.setAttribute('data-theme', next);
+					root.style.setProperty('color-scheme', next);
+					try {
+						localStorage.setItem('jexon.theme.v1', next);
+					} catch (e) {}
+				});
+			})();
+		</script>
+	</body>
+</html>

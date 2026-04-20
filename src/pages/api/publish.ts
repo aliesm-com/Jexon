@@ -1,5 +1,4 @@
 import type { APIRoute } from 'astro';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { ZodError } from 'zod';
 
 import {
@@ -12,6 +11,16 @@ import {
 } from '../../lib/content-model';
 import { markdownToRichText } from '../../lib/rich-text';
 import { publishRequestSchema } from '../../lib/schemas';
+import type { S3UploadContext } from '../../lib/s3-server';
+import {
+	buildFileObjectKey,
+	buildS3Key,
+	createS3UploadContext,
+	createS3UploadContextOrNull,
+	decodeBase64,
+	sanitizeFileName,
+	uploadBuffer,
+} from '../../lib/s3-server';
 
 interface PublishResult {
 	bundle: ContentBundle;
@@ -21,13 +30,6 @@ interface PublishResult {
 		uri: string;
 		url?: string;
 	};
-}
-
-interface S3UploadContext {
-	client: S3Client;
-	bucket: string;
-	prefix: string;
-	publicBaseUrl?: string;
 }
 
 interface FileFieldInput {
@@ -52,12 +54,14 @@ export const POST: APIRoute = async ({ request }) => {
 	try {
 		const payload = publishRequestSchema.parse(rawBody);
 		const modules = ensureValidModules(payload.modules);
-		const options = payload.options ?? { uploadToS3: false, s3KeyPrefix: 'published' };
-		const uploadContext = options.uploadToS3 ? createS3UploadContext(options) : null;
+		const options = payload.options ?? { uploadToS3: false, uploadAssetFilesToS3: true, s3KeyPrefix: 'published' };
+		const uploadAssetFilesToS3 = options.uploadAssetFilesToS3 !== false;
+		const assetUploadContext = uploadAssetFilesToS3 ? createS3UploadContextOrNull(options) : null;
+		const bundleUploadContext = options.uploadToS3 ? createS3UploadContext(options) : null;
 		const entries: ContentBundle['entries'] = [];
 
 		for (const entry of payload.entries) {
-			entries.push(await normalizeEntry(entry, modules, uploadContext));
+			entries.push(await normalizeEntry(entry, modules, assetUploadContext, uploadAssetFilesToS3));
 		}
 
 		const bundle: ContentBundle = {
@@ -68,8 +72,8 @@ export const POST: APIRoute = async ({ request }) => {
 		};
 
 		const result: PublishResult = { bundle };
-		if (uploadContext) {
-			result.upload = await uploadBundleToS3(bundle, uploadContext);
+		if (bundleUploadContext) {
+			result.upload = await uploadBundleToS3(bundle, bundleUploadContext);
 		}
 
 		return jsonResponse(result, 200);
@@ -116,7 +120,8 @@ function ensureValidModules(modules: FieldModule[]): FieldModule[] {
 async function normalizeEntry(
 	entry: DraftEntry,
 	modules: FieldModule[],
-	uploadContext: S3UploadContext | null,
+	assetUploadContext: S3UploadContext | null,
+	uploadAssetFilesToS3: boolean,
 ): Promise<ContentBundle['entries'][number]> {
 	const selectedModule = modules.find((module) => module.id === entry.moduleId);
 	if (!selectedModule) {
@@ -127,7 +132,13 @@ async function normalizeEntry(
 
 	for (const field of selectedModule.fields) {
 		const rawValue = entry.values[field.id];
-		normalizedValues[field.id] = await normalizeFieldValue(field, rawValue, entry.id, uploadContext);
+		normalizedValues[field.id] = await normalizeFieldValue(
+			field,
+			rawValue,
+			entry.id,
+			assetUploadContext,
+			uploadAssetFilesToS3,
+		);
 	}
 
 	return {
@@ -143,7 +154,8 @@ async function normalizeFieldValue(
 	field: FieldDefinition,
 	rawValue: unknown,
 	entryId: string,
-	uploadContext: S3UploadContext | null,
+	assetUploadContext: S3UploadContext | null,
+	uploadAssetFilesToS3: boolean,
 ): Promise<unknown> {
 	if (isMissing(rawValue)) {
 		if (field.required) {
@@ -215,7 +227,7 @@ async function normalizeFieldValue(
 			return markdownToRichText(rawValue);
 		}
 		case 'file': {
-			return normalizeFileFieldValue(field, rawValue, entryId, uploadContext);
+			return normalizeFileFieldValue(field, rawValue, entryId, assetUploadContext, uploadAssetFilesToS3);
 		}
 		default: {
 			throw new Error(`Unsupported field type for '${field.id}'`);
@@ -228,6 +240,7 @@ async function normalizeFileFieldValue(
 	rawValue: unknown,
 	entryId: string,
 	uploadContext: S3UploadContext | null,
+	uploadAssetFilesToS3: boolean,
 ): Promise<unknown> {
 	if (typeof rawValue === 'string') {
 		const trimmed = rawValue.trim();
@@ -277,6 +290,12 @@ async function normalizeFileFieldValue(
 
 	const buffer = decodeBase64(dataBase64, field.id);
 
+	if (uploadAssetFilesToS3 && !uploadContext) {
+		throw new Error(
+			`Field '${field.id}' requires S3 settings (bucket, region, access keys) to upload files. Configure them in Settings or environment variables.`,
+		);
+	}
+
 	if (!uploadContext) {
 		return {
 			fileName,
@@ -287,7 +306,7 @@ async function normalizeFileFieldValue(
 	}
 
 	const key = buildFileObjectKey(uploadContext.prefix, entryId, field.id, fileName);
-	await uploadBuffer(uploadContext, key, buffer, mimeType);
+	await uploadBuffer(uploadContext, key, buffer, mimeType, { aclPublic: true });
 
 	const result: Record<string, unknown> = {
 		fileName,
@@ -297,7 +316,7 @@ async function normalizeFileFieldValue(
 		uri: `s3://${uploadContext.bucket}/${key}`,
 	};
 
-	const url = resolvePublicUrl(uploadContext.publicBaseUrl, key);
+	const url = uploadContext.resolvePublicUrl(key);
 	if (url) {
 		result.url = url;
 	}
@@ -317,40 +336,6 @@ function isMissing(value: unknown): boolean {
 	return false;
 }
 
-function createS3UploadContext(options: PublishOptions): S3UploadContext {
-	const s3 = options.s3 ?? {};
-	const bucket = (s3.bucket || import.meta.env.S3_BUCKET_NAME || '').trim();
-	const region = (s3.region || import.meta.env.AWS_REGION || '').trim();
-	const accessKeyId = (s3.accessKeyId || import.meta.env.AWS_ACCESS_KEY_ID || '').trim();
-	const secretAccessKey = (s3.secretAccessKey || import.meta.env.AWS_SECRET_ACCESS_KEY || '').trim();
-	const endpoint = (s3.endpoint || import.meta.env.S3_ENDPOINT || '').trim();
-	const forcePathStyle = s3.forcePathStyle ?? import.meta.env.S3_FORCE_PATH_STYLE === 'true';
-	const publicBaseUrl = normalizePublicBaseUrl(s3.publicBaseUrl);
-
-	if (!bucket || !region || !accessKeyId || !secretAccessKey) {
-		throw new Error(
-			'S3 settings are incomplete. Required: bucket, region, accessKeyId, secretAccessKey (from request options or env vars).',
-		);
-	}
-
-	const client = new S3Client({
-		region,
-		endpoint: endpoint || undefined,
-		forcePathStyle,
-		credentials: {
-			accessKeyId,
-			secretAccessKey,
-		},
-	});
-
-	return {
-		client,
-		bucket,
-		prefix: normalizeS3Prefix(options.s3KeyPrefix ?? 'published'),
-		publicBaseUrl,
-	};
-}
-
 async function uploadBundleToS3(bundle: ContentBundle, context: S3UploadContext): Promise<NonNullable<PublishResult['upload']>> {
 	const fileName = `${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
 	const key = buildS3Key(context.prefix, fileName);
@@ -362,88 +347,8 @@ async function uploadBundleToS3(bundle: ContentBundle, context: S3UploadContext)
 		bucket: context.bucket,
 		key,
 		uri: `s3://${context.bucket}/${key}`,
-		url: resolvePublicUrl(context.publicBaseUrl, key),
+		url: context.resolvePublicUrl(key),
 	};
-}
-
-async function uploadBuffer(context: S3UploadContext, key: string, body: Buffer, contentType: string): Promise<void> {
-	await context.client.send(
-		new PutObjectCommand({
-			Bucket: context.bucket,
-			Key: key,
-			Body: body,
-			ContentType: contentType,
-		}),
-	);
-}
-
-function buildFileObjectKey(prefix: string, entryId: string, fieldId: string, fileName: string): string {
-	const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-	const safeEntry = sanitizeFileName(entryId);
-	const safeField = sanitizeFileName(fieldId);
-	return buildS3Key(prefix, `assets/${safeEntry}/${safeField}/${stamp}-${fileName}`);
-}
-
-function buildS3Key(prefix: string, leaf: string): string {
-	const cleanLeaf = leaf.replace(/^\/+|\/+$/g, '');
-	if (!prefix) {
-		return cleanLeaf;
-	}
-	return `${prefix}/${cleanLeaf}`;
-}
-
-function normalizeS3Prefix(prefix: string): string {
-	return prefix.replace(/^\/+|\/+$/g, '').trim();
-}
-
-function sanitizeFileName(name: string): string {
-	const cleaned = name
-		.trim()
-		.replace(/[\\/:*?"<>|]+/g, '-')
-		.replace(/\s+/g, '-')
-		.replace(/-{2,}/g, '-')
-		.replace(/^-|-$/g, '');
-
-	return cleaned || 'file.bin';
-}
-
-function decodeBase64(input: string, fieldId: string): Buffer {
-	const normalized = input.includes(',') ? input.split(',').pop() ?? '' : input;
-	const compact = normalized.replace(/\s+/g, '');
-	if (!compact || !/^[A-Za-z0-9+/=]+$/.test(compact)) {
-		throw new Error(`Field '${fieldId}' has invalid base64 content`);
-	}
-
-	try {
-		return Buffer.from(compact, 'base64');
-	} catch {
-		throw new Error(`Field '${fieldId}' has invalid base64 content`);
-	}
-}
-
-function normalizePublicBaseUrl(value: string | undefined): string | undefined {
-	if (!value) {
-		return undefined;
-	}
-
-	const trimmed = value.trim().replace(/\/+$/g, '');
-	if (!trimmed) {
-		return undefined;
-	}
-
-	try {
-		new URL(trimmed);
-		return trimmed;
-	} catch {
-		throw new Error('options.s3.publicBaseUrl must be a valid absolute URL');
-	}
-}
-
-function resolvePublicUrl(publicBaseUrl: string | undefined, key: string): string | undefined {
-	if (!publicBaseUrl) {
-		return undefined;
-	}
-	return `${publicBaseUrl}/${key}`;
 }
 
 function jsonResponse(body: unknown, status = 200): Response {

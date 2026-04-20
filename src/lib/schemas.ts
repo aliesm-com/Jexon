@@ -36,6 +36,7 @@ export const draftEntrySchema = z.object({
 export const publishOptionsSchema = z
 	.object({
 		uploadToS3: z.boolean().optional().default(false),
+		uploadAssetFilesToS3: z.boolean().optional().default(true),
 		s3KeyPrefix: z.string().optional(),
 		s3: z
 			.object({
@@ -49,10 +50,32 @@ export const publishOptionsSchema = z
 			})
 			.optional(),
 	})
-	.default({ uploadToS3: false, s3KeyPrefix: 'published' });
+	.default({ uploadToS3: false, uploadAssetFilesToS3: true, s3KeyPrefix: 'published' });
 
 export const publishRequestSchema = z.object({
 	modules: z.array(fieldModuleSchema).min(1, 'At least one module is required'),
 	entries: z.array(draftEntrySchema).default([]),
 	options: publishOptionsSchema.optional().default({ uploadToS3: false, s3KeyPrefix: 'published' }),
+});
+
+export const uploadAssetRequestSchema = z.object({
+	fileName: z.string().min(1, 'fileName is required'),
+	mimeType: z.string().min(1, 'mimeType is required'),
+	dataBase64: z.string().min(1, 'dataBase64 is required'),
+	options: z
+		.object({
+			s3KeyPrefix: z.string().optional(),
+			s3: z
+				.object({
+					bucket: z.string().optional(),
+					region: z.string().optional(),
+					accessKeyId: z.string().optional(),
+					secretAccessKey: z.string().optional(),
+					endpoint: z.string().optional(),
+					forcePathStyle: z.boolean().optional(),
+					publicBaseUrl: z.string().optional(),
+				})
+				.optional(),
+		})
+		.optional(),
 });

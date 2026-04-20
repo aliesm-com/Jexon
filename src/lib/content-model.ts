@@ -105,7 +105,10 @@ export interface ContentBundle {
 }
 
 export interface PublishOptions {
+	/** When true, uploads the final bundle JSON to S3 (independent of file fields). */
 	uploadToS3?: boolean;
+	/** When true (default), file field payloads are uploaded to S3 and normalized to public URLs in JSON. Requires complete S3 settings. */
+	uploadAssetFilesToS3?: boolean;
 	s3KeyPrefix?: string;
 	s3?: {
 		bucket?: string;

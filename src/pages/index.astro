@@ -1,5 +1,12 @@
 ---
 import '../styles/app.css';
+
+const siteTitle = 'Jexon Content Composer | Structured Content Builder';
+const siteDescription =
+	'Build structured content modules, create entries, and publish JSON bundles with optional S3 asset workflows using Jexon Content Composer.';
+const siteKeywords =
+	'Jexon, content composer, structured content, JSON schema, S3 publish, Astro content tool';
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : undefined;
 ---
 
 <html lang="en" dir="ltr">
@@ -9,164 +16,324 @@ import '../styles/app.css';
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Jexon Content Composer</title>
+		<title>{siteTitle}</title>
+		<meta name="description" content={siteDescription} />
+		<meta name="keywords" content={siteKeywords} />
+		<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={siteTitle} />
+		<meta property="og:description" content={siteDescription} />
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:title" content={siteTitle} />
+		<meta property="twitter:description" content={siteDescription} />
+		{canonical && <link rel="canonical" href={canonical} />}
+		<script is:inline>
+			(function () {
+				try {
+					var k = 'jexon.theme.v1';
+					var t = localStorage.getItem(k);
+					var el = document.documentElement;
+					if (t === 'dark' || t === 'light') {
+						el.setAttribute('data-theme', t);
+					} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+						el.setAttribute('data-theme', 'dark');
+					} else {
+						el.setAttribute('data-theme', 'light');
+					}
+					el.style.colorScheme = el.getAttribute('data-theme') || 'light';
+				} catch (e) {}
+			})();
+		</script>
 	</head>
 	<body>
-		<main>
-			<header class="hero">
-				<h1>Jexon Content Composer</h1>
-				<p>
-					Build reusable field modules, create content entries from those modules, convert rich text to a stable JSON format,
-					and publish your final bundle locally or to S3.
-				</p>
-			</header>
+		<div class="app-shell" id="app-shell">
+			<div class="app-main">
+				<header class="app-topbar">
+					<h1 class="topbar-title">Jexon</h1>
+					<div class="topbar-actions">
+						<a class="topbar-link" href="/about/" aria-label="Go to About page">About</a>
+						<button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Light / dark theme">
+							<svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<circle cx="12" cy="12" r="4"></circle>
+								<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+							</svg>
+							<svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+							</svg>
+						</button>
+					</div>
+				</header>
 
-			<section class="grid">
-				<section class="panel modules">
-					<h2>1) Module Builder</h2>
-					<p>Modules are exportable/importable with versioned JSON (`module-1`).</p>
-					<div class="cols-2">
-						<label class="stack" for="module-id">
-							<span>Module ID</span>
-							<input id="module-id" placeholder="blog_post" />
-						</label>
-						<label class="stack" for="module-name">
-							<span>Module Name</span>
-							<input id="module-name" placeholder="Blog Post" />
-						</label>
-					</div>
-					<label class="stack" for="module-description">
-						<span>Description</span>
-						<input id="module-description" placeholder="Used for long-form blog posts" />
-					</label>
+				<div class="app-content">
+						<nav class="wizard-stepper" aria-label="Workflow steps">
+							<ol class="wizard-stepper__list">
+								<li class="wizard-stepper__item">
+									<button type="button" class="wizard-stepper__btn" data-wizard-step="0" aria-current="step">
+										<span class="wizard-stepper__num">1</span>
+										<span class="wizard-stepper__label">Start</span>
+									</button>
+								</li>
+								<li class="wizard-stepper__line" aria-hidden="true"></li>
+								<li class="wizard-stepper__item">
+									<button type="button" class="wizard-stepper__btn" data-wizard-step="1">
+										<span class="wizard-stepper__num">2</span>
+										<span class="wizard-stepper__label">Modules</span>
+									</button>
+								</li>
+								<li class="wizard-stepper__line" aria-hidden="true"></li>
+								<li class="wizard-stepper__item">
+									<button type="button" class="wizard-stepper__btn" data-wizard-step="2">
+										<span class="wizard-stepper__num">3</span>
+										<span class="wizard-stepper__label">Entries</span>
+									</button>
+								</li>
+								<li class="wizard-stepper__line" aria-hidden="true"></li>
+								<li class="wizard-stepper__item">
+									<button type="button" class="wizard-stepper__btn" data-wizard-step="3">
+										<span class="wizard-stepper__num">4</span>
+										<span class="wizard-stepper__label">Publish</span>
+									</button>
+								</li>
+							</ol>
+						</nav>
 
-					<h3>Field Draft</h3>
-					<div class="cols-2">
-						<label class="stack" for="field-id">
-							<span>Field ID</span>
-							<input id="field-id" placeholder="title" />
-						</label>
-						<label class="stack" for="field-label">
-							<span>Field Label</span>
-							<input id="field-label" placeholder="Title" />
-						</label>
-					</div>
-					<div class="cols-2">
-						<label class="stack" for="field-type">
-							<span>Field Type</span>
-							<select id="field-type"></select>
-						</label>
-						<label class="stack" for="field-help">
-							<span>Help Text (optional)</span>
-							<input id="field-help" placeholder="Displayed below the field" />
-						</label>
-					</div>
-					<label class="toggle" for="field-required">
-						<input id="field-required" type="checkbox" />
-						<span>Required</span>
-					</label>
-					<div class="row">
-						<button id="add-field-btn" type="button">Add Field</button>
-						<button id="clear-fields-btn" type="button">Clear Fields</button>
-					</div>
-					<div id="draft-field-list" class="chip-list"></div>
-					<div class="row">
-						<button id="save-module-btn" type="button">Save Module</button>
-						<button id="reset-module-btn" type="button">Reset Form</button>
-					</div>
+						<header id="wizard-hero" class="hero hero--compact" hidden>
+							<div class="hero-inner">
+								<p class="hero-badge">Content composer</p>
+								<h1>Jexon Content Composer</h1>
+								<p>
+									Build modules, create entries, normalize rich text to JSON, and publish to S3—with public asset URLs when configured.
+								</p>
+							</div>
+						</header>
 
-					<h3>Module Import / Export</h3>
-					<label class="stack" for="module-import">
-						<span>Module JSON</span>
-						<textarea id="module-import" rows="8" placeholder='{"schemaVersion":"module-1", ...}'></textarea>
-					</label>
-					<div class="row">
-						<button id="import-module-btn" type="button">Import Module JSON</button>
-					</div>
-					<div id="module-list" class="card-list"></div>
-				</section>
+						<!-- Step 1: Import vs new -->
+						<div id="wizard-panel-0" class="wizard-panel">
+							<section class="panel start-panel">
+								<h2 class="start-panel__title">How do you want to begin?</h2>
+								<p class="muted start-panel__lead">Import existing JSON (module, workspace, or S3 settings) or start with a blank module builder.</p>
+								<div class="start-choice-grid">
+									<button type="button" class="start-choice-card" id="start-import-btn">
+										<span class="start-choice-card__icon" aria-hidden="true">↓</span>
+										<span class="start-choice-card__title">Import</span>
+										<span class="start-choice-card__desc">Paste or load JSON: <code>module-1</code>, <code>jexon-export-1</code>, or <code>jexon-workspace-1</code>. S3 keys can be included.</span>
+									</button>
+									<button type="button" class="start-choice-card" id="start-scratch-btn">
+										<span class="start-choice-card__icon" aria-hidden="true">+</span>
+										<span class="start-choice-card__title">New</span>
+										<span class="start-choice-card__desc">Create modules from scratch, add fields, then entries and publish. No file required.</span>
+									</button>
+								</div>
+							</section>
+						</div>
 
-				<section class="panel entries">
-					<h2>2) Entry Builder</h2>
-					<p>Create content entries using any saved module. `richText` now has a visual toolbar editor, and `file` supports upload payloads.</p>
-					<label class="stack" for="entry-module-select">
-						<span>Select Module</span>
-						<select id="entry-module-select">
-							<option value="">Select a module</option>
-						</select>
-					</label>
-					<label class="stack" for="entry-title">
-						<span>Entry Title</span>
-						<input id="entry-title" placeholder="My first article" />
-					</label>
-					<div id="entry-field-container"></div>
-					<div class="row">
-						<button id="add-entry-btn" type="button">Add Entry</button>
-					</div>
+						<!-- Step 2: Modules -->
+						<div id="wizard-panel-1" class="wizard-panel" hidden>
+							<section id="section-modules" class="section-anchor panel modules">
+								<h2><span class="step">2</span> Module Builder</h2>
+								<p>Choose one mode. Import and New are now fully separated.</p>
+								<div class="mode-toggle" role="tablist" aria-label="Module mode">
+									<button type="button" class="mode-toggle__btn" id="mode-import-btn" data-start-mode="import">Import mode</button>
+									<button type="button" class="mode-toggle__btn" id="mode-scratch-btn" data-start-mode="scratch">New mode</button>
+								</div>
 
-					<h3>Saved Entries</h3>
-					<div id="entry-list" class="card-list"></div>
-				</section>
+								<div id="mode-import-panel" class="mode-panel" hidden>
+									<h3>Import Workspace / Module</h3>
+									<p class="muted">Only import/export JSON here. S3 settings are configured in New mode.</p>
+									<label class="stack" for="module-import">
+										<span>Paste JSON</span>
+										<textarea id="module-import" rows="8" placeholder='module-1, jexon-export-1 (module + S3), or jexon-workspace-1 (all modules + S3)'></textarea>
+									</label>
+									<div class="row gap-sm">
+										<button id="import-module-btn" type="button" class="btn--outline">Import from JSON</button>
+										<button id="export-workspace-btn" type="button" class="btn--outline">Export workspace (modules + S3)</button>
+									</div>
+								</div>
 
-				<section class="panel publish">
-					<h2>3) Publish</h2>
-					<p>The final output is generated as versioned JSON (`bundle-1`) with normalized rich text documents and optional S3 uploads.</p>
-					<div class="cols-2">
-						<label class="toggle" for="publish-upload-s3">
-							<input id="publish-upload-s3" type="checkbox" />
-							<span>Upload to S3</span>
-						</label>
-						<label class="stack" for="publish-s3-prefix">
-							<span>S3 Key Prefix</span>
-							<input id="publish-s3-prefix" value="published" />
-						</label>
+								<div id="mode-scratch-panel" class="mode-panel" hidden>
+									<h3>Create New Module</h3>
+									<div class="cols-2">
+										<label class="stack" for="module-id">
+											<span>Module ID</span>
+											<input id="module-id" placeholder="blog_post" />
+										</label>
+										<label class="stack" for="module-name">
+											<span>Module Name</span>
+											<input id="module-name" placeholder="Blog Post" />
+										</label>
+									</div>
+									<label class="stack" for="module-description">
+										<span>Description</span>
+										<input id="module-description" placeholder="Used for long-form blog posts" />
+									</label>
+									<h3>Field Draft</h3>
+									<div class="cols-2">
+										<label class="stack" for="field-id">
+											<span>Field ID</span>
+											<input id="field-id" placeholder="title" />
+										</label>
+										<label class="stack" for="field-label">
+											<span>Field Label</span>
+											<input id="field-label" placeholder="Title" />
+										</label>
+									</div>
+									<div class="cols-2">
+										<label class="stack" for="field-type">
+											<span>Field Type</span>
+											<select id="field-type"></select>
+										</label>
+										<label class="stack" for="field-help">
+											<span>Help Text (optional)</span>
+											<input id="field-help" placeholder="Displayed below the field" />
+										</label>
+									</div>
+									<label class="toggle" for="field-required">
+										<input id="field-required" type="checkbox" />
+										<span>Required</span>
+									</label>
+									<div class="row">
+										<button id="add-field-btn" type="button">Add Field</button>
+										<button id="clear-fields-btn" type="button" class="btn--ghost">Clear Fields</button>
+									</div>
+									<div id="draft-field-list" class="chip-list"></div>
+									<div class="row">
+										<button id="save-module-btn" type="button">Save Module</button>
+										<button id="reset-module-btn" type="button" class="btn--ghost">Reset Form</button>
+									</div>
+
+									<h3>S3 Settings</h3>
+									<p class="muted">Used for asset uploads and publish. These values are also embedded in exports.</p>
+									<details class="import-details" id="import-details-block">
+										<summary>S3 credentials</summary>
+										<div class="details-inner">
+											<div class="cols-2">
+												<label class="stack" for="settings-s3-bucket">
+													<span>Bucket</span>
+													<input id="settings-s3-bucket" autocomplete="off" placeholder="my-content-bucket" />
+												</label>
+												<label class="stack" for="settings-s3-region">
+													<span>Region</span>
+													<input id="settings-s3-region" autocomplete="off" placeholder="us-east-1" />
+												</label>
+											</div>
+											<div class="cols-2">
+												<label class="stack" for="settings-s3-access-key">
+													<span>Access Key ID</span>
+													<input id="settings-s3-access-key" autocomplete="off" placeholder="AKIA..." />
+												</label>
+												<label class="stack" for="settings-s3-secret-key">
+													<span>Secret Access Key</span>
+													<input id="settings-s3-secret-key" type="password" autocomplete="new-password" placeholder="Secret" />
+												</label>
+											</div>
+											<div class="cols-2">
+												<label class="stack" for="settings-s3-endpoint">
+													<span>Endpoint (optional)</span>
+													<input id="settings-s3-endpoint" placeholder="R2 / MinIO" />
+												</label>
+												<label class="stack" for="settings-s3-public-base-url">
+													<span>Public base URL (optional)</span>
+													<input id="settings-s3-public-base-url" placeholder="CDN — often required for non-AWS" />
+												</label>
+											</div>
+											<label class="toggle" for="settings-s3-force-path-style">
+												<input id="settings-s3-force-path-style" type="checkbox" />
+												<span>Force path-style addressing</span>
+											</label>
+											<div class="cols-2">
+												<label class="toggle" for="settings-upload-asset-files">
+													<input id="settings-upload-asset-files" type="checkbox" checked />
+													<span>On publish, upload file fields to S3 (public URL in JSON)</span>
+												</label>
+												<div class="row gap-sm" style="align-items: flex-end">
+													<button id="save-s3-settings-btn" type="button" class="btn--outline">Save S3 locally</button>
+												</div>
+											</div>
+										</div>
+									</details>
+								</div>
+
+								<h3>Saved Modules</h3>
+								<div id="module-list" class="card-list"></div>
+
+								<div class="wizard-nav">
+									<button type="button" class="btn--ghost wizard-nav__back" data-wizard-back>← Back to start</button>
+									<button type="button" class="wizard-nav__next" data-wizard-next="2">Continue to entries →</button>
+								</div>
+							</section>
+						</div>
+
+						<!-- Step 3: Entries -->
+						<div id="wizard-panel-2" class="wizard-panel" hidden>
+							<section id="section-entries" class="section-anchor panel entries">
+								<h2><span class="step">3</span> Entry Builder</h2>
+								<p>
+									Create entries from a module. <strong>Rich text</strong> uses a visual editor (headings, bold, lists, links, images). Images upload to S3 when credentials are set in the Modules step.
+								</p>
+								<label class="stack" for="entry-module-select">
+									<span>Select Module</span>
+									<select id="entry-module-select">
+										<option value="">Select a module</option>
+									</select>
+								</label>
+								<label class="stack" for="entry-title">
+									<span>Entry Title</span>
+									<input id="entry-title" placeholder="My first article" />
+								</label>
+								<div id="entry-field-container"></div>
+								<div class="row">
+									<button id="add-entry-btn" type="button">Add Entry</button>
+								</div>
+
+								<h3>Saved Entries</h3>
+								<div id="entry-list" class="card-list"></div>
+
+								<div class="wizard-nav">
+									<button type="button" class="btn--ghost wizard-nav__back" data-wizard-back>← Modules</button>
+									<button type="button" class="wizard-nav__next" data-wizard-next="3">Continue to publish →</button>
+								</div>
+							</section>
+						</div>
+
+						<!-- Step 4: Publish -->
+						<div id="wizard-panel-3" class="wizard-panel" hidden>
+							<section id="section-publish" class="section-anchor panel publish">
+								<h2><span class="step">4</span> Publish</h2>
+								<p>Build versioned JSON (<code>bundle-1</code>). Configure S3 in the Modules step (embedded in exports). Rich text and file fields use public S3 objects when credentials are set.</p>
+								<div class="cols-2">
+									<label class="toggle" for="publish-upload-s3">
+										<input id="publish-upload-s3" type="checkbox" />
+										<span>Also upload bundle JSON to S3</span>
+									</label>
+									<label class="stack" for="publish-s3-prefix">
+										<span>S3 key prefix (files + bundle)</span>
+										<input id="publish-s3-prefix" value="published" />
+									</label>
+								</div>
+								<div class="row">
+									<button id="publish-btn" type="button">Build Final JSON</button>
+									<button id="clear-storage-btn" type="button" class="btn--danger">Clear Local Data</button>
+								</div>
+								<p id="publish-status" class="status" data-state="info"></p>
+								<label class="stack" for="publish-output">
+									<span>Published JSON</span>
+									<textarea id="publish-output" class="output" rows="16" readonly></textarea>
+								</label>
+
+								<div class="wizard-nav">
+									<button type="button" class="btn--ghost wizard-nav__back" data-wizard-back>← Entries</button>
+								</div>
+							</section>
+						</div>
 					</div>
-					<div class="cols-2">
-						<label class="stack" for="publish-s3-bucket">
-							<span>S3 Bucket</span>
-							<input id="publish-s3-bucket" placeholder="my-content-bucket" />
-						</label>
-						<label class="stack" for="publish-s3-region">
-							<span>S3 Region</span>
-							<input id="publish-s3-region" placeholder="us-east-1" />
-						</label>
-					</div>
-					<div class="cols-2">
-						<label class="stack" for="publish-s3-access-key">
-							<span>S3 Access Key ID</span>
-							<input id="publish-s3-access-key" placeholder="AKIA..." />
-						</label>
-						<label class="stack" for="publish-s3-secret-key">
-							<span>S3 Secret Access Key</span>
-							<input id="publish-s3-secret-key" type="password" placeholder="••••••••" />
-						</label>
-					</div>
-					<div class="cols-2">
-						<label class="stack" for="publish-s3-endpoint">
-							<span>S3 Endpoint (optional)</span>
-							<input id="publish-s3-endpoint" placeholder="https://s3.amazonaws.com" />
-						</label>
-						<label class="stack" for="publish-s3-public-base-url">
-							<span>Public Base URL (optional)</span>
-							<input id="publish-s3-public-base-url" placeholder="https://cdn.example.com" />
-						</label>
-					</div>
-					<label class="toggle" for="publish-s3-force-path-style">
-						<input id="publish-s3-force-path-style" type="checkbox" />
-						<span>Use S3 path-style URLs</span>
-					</label>
-					<div class="row">
-						<button id="publish-btn" type="button">Build Final JSON</button>
-						<button id="clear-storage-btn" type="button" class="danger">Clear Local Data</button>
-					</div>
-					<p id="publish-status" class="status" data-state="info"></p>
-					<label class="stack" for="publish-output">
-						<span>Published JSON</span>
-						<textarea id="publish-output" class="output" rows="16" readonly></textarea>
-					</label>
-				</section>
-			</section>
-		</main>
+					<footer class="site-footer">
+						<p>
+							Powered By <a href="https://github.com/aliesm-com" target="_blank" rel="noopener noreferrer">AliESM</a>
+						</p>
+					</footer>
+				</div>
+			</div>
+		</div>
 		<script src="../scripts/app.ts"></script>
 	</body>
 </html>
