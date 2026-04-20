@@ -18,7 +18,9 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 		<title>{siteTitle}</title>
 		<meta name="description" content={siteDescription} />
 		<meta name="keywords" content={siteKeywords} />
+		<meta name="theme-color" content="#1d4ed8" />
 		<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+		<link rel="manifest" href="/manifest.webmanifest" />
 		<meta property="og:type" content="website" />
 		<meta property="og:title" content={siteTitle} />
 		<meta property="og:description" content={siteDescription} />
@@ -50,7 +52,26 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 				<header class="app-topbar">
 					<h1 class="topbar-title">Jexon</h1>
 					<div class="topbar-actions">
-						<a class="topbar-link" href="/" aria-label="Back to Home">Home</a>
+						<select id="about-language-select" class="topbar-lang" aria-label="Language selector">
+							<option value="en">EN</option>
+							<option value="fr">FR</option>
+							<option value="es">ES</option>
+							<option value="ar">AR</option>
+							<option value="fa">FA</option>
+						</select>
+						<div class="topbar-lang-picker" id="about-language-picker">
+							<button type="button" class="topbar-lang-picker__trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Language selector">
+								<span data-lang-current>EN</span>
+							</button>
+							<ul class="topbar-lang-picker__menu" role="listbox" aria-label="Language selector">
+								<li><button type="button" data-lang-option="en">EN</button></li>
+								<li><button type="button" data-lang-option="fr">FR</button></li>
+								<li><button type="button" data-lang-option="es">ES</button></li>
+								<li><button type="button" data-lang-option="ar">AR</button></li>
+								<li><button type="button" data-lang-option="fa">FA</button></li>
+							</ul>
+						</div>
+						<a id="about-home-link" class="topbar-link" href="/" aria-label="Back to Home">Home</a>
 						<button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Light / dark theme">
 							<svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 								<circle cx="12" cy="12" r="4"></circle>
@@ -65,20 +86,20 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 
 				<div class="app-content">
 					<section class="panel about-panel">
-						<h2>About Jexon</h2>
-						<p>
+						<h2 id="about-title">About Jexon</h2>
+						<p id="about-p1">
 							Jexon Content Composer is a structured content workflow tool for building modules, capturing entries, and exporting versioned JSON for publishing pipelines.
 						</p>
-						<p>
+						<p id="about-p2">
 							The editor supports rich text and optional S3-backed asset workflows, making it easier to move from draft content to production-ready bundles with predictable schemas.
 						</p>
 						<div class="row">
-							<a href="/" class="btn--ghost about-back-link">← Back to Home</a>
+							<a href="/" id="about-back-link" class="btn--ghost about-back-link">← Back to Home</a>
 						</div>
 					</section>
 					<footer class="site-footer">
-						<p>
-							Powered By <a href="https://github.com/aliesm-com" target="_blank" rel="noopener noreferrer">AliESM</a>
+						<p id="about-footer-powered">
+							Powered By <a id="about-footer-ali-link" href="https://github.com/aliesm-com" target="_blank" rel="noopener noreferrer">AliESM</a>
 						</p>
 					</footer>
 				</div>
@@ -86,6 +107,130 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 		</div>
 		<script is:inline>
 			(function () {
+				var STORAGE_LANG_KEY = 'jexon.lang.v1';
+				var i18n = {
+					en: {
+						home: 'Home',
+						aboutTitle: 'About Jexon',
+						aboutP1: 'Jexon Content Composer is a structured content workflow tool for building modules, capturing entries, and exporting versioned JSON for publishing pipelines.',
+						aboutP2: 'The editor supports rich text and optional S3-backed asset workflows, making it easier to move from draft content to production-ready bundles with predictable schemas.',
+						back: '← Back to Home',
+						powered: 'Powered By',
+					},
+					fr: {
+						home: 'Accueil',
+						aboutTitle: 'A propos de Jexon',
+						aboutP1: 'Jexon Content Composer est un outil de workflow de contenu structure pour creer des modules, gerer des entrees et exporter des JSON versionnes pour la publication.',
+						aboutP2: "L'editeur prend en charge le texte riche et les workflows d'assets S3 optionnels pour passer plus facilement du brouillon au bundle pret pour la production.",
+						back: "← Retour a l'accueil",
+						powered: 'Propulse par',
+					},
+					es: {
+						home: 'Inicio',
+						aboutTitle: 'Acerca de Jexon',
+						aboutP1: 'Jexon Content Composer es una herramienta de flujo de contenido estructurado para crear modulos, gestionar entradas y exportar JSON versionado para publicacion.',
+						aboutP2: 'El editor admite texto enriquecido y flujos de assets con S3 opcionales para pasar de borrador a bundle listo para produccion.',
+						back: '← Volver al inicio',
+						powered: 'Impulsado por',
+					},
+					ar: {
+						home: 'الرئيسية',
+						aboutTitle: 'حول Jexon',
+						aboutP1: 'Jexon Content Composer اداة لسير عمل المحتوى المنظم لبناء الوحدات وادارة الادخالات وتصدير JSON باصدار قابل للنشر.',
+						aboutP2: 'يدعم المحرر النص الغني ومسارات الassets الاختيارية عبر S3 لتسهيل الانتقال من المسودة الى حزمة جاهزة للانتاج.',
+						back: 'العودة الى الرئيسية ←',
+						powered: 'Powered By',
+					},
+					fa: {
+						home: 'خانه',
+						aboutTitle: 'درباره Jexon',
+						aboutP1: 'Jexon Content Composer ابزاری برای مدیریت محتوای ساختاریافته است که به شما کمک می‌کند ماژول بسازید، ورودی ثبت کنید و JSON نسخه‌دار خروجی بگیرید.',
+						aboutP2: 'این ویرایشگر از متن غنی و مسیرهای اختیاری S3 برای فایل‌ها پشتیبانی می‌کند تا از پیش‌نویس تا انتشار نهایی سریع‌تر پیش بروید.',
+						back: '← بازگشت به صفحه اصلی',
+						powered: 'Powered By',
+					},
+				};
+				function applyLang(lang) {
+					var t = i18n[lang] || i18n.en;
+					var rtl = lang === 'ar' || lang === 'fa';
+					document.documentElement.setAttribute('lang', lang);
+					document.documentElement.setAttribute('dir', rtl ? 'rtl' : 'ltr');
+					document.getElementById('about-home-link').textContent = t.home;
+					document.getElementById('about-home-link').setAttribute('aria-label', t.home);
+					document.getElementById('about-title').textContent = t.aboutTitle;
+					document.getElementById('about-p1').textContent = t.aboutP1;
+					document.getElementById('about-p2').textContent = t.aboutP2;
+					document.getElementById('about-back-link').textContent = t.back;
+					document.getElementById('about-footer-powered').childNodes[0].nodeValue = t.powered + ' ';
+					var select = document.getElementById('about-language-select');
+					if (select) select.value = lang;
+					syncPicker(lang);
+				}
+
+				function syncPicker(lang) {
+					var picker = document.getElementById('about-language-picker');
+					if (!picker) return;
+					var current = picker.querySelector('[data-lang-current]');
+					if (current) current.textContent = String(lang || '').toUpperCase();
+					picker.querySelectorAll('[data-lang-option]').forEach(function (btn) {
+						var active = btn.getAttribute('data-lang-option') === lang;
+						btn.classList.toggle('is-active', active);
+						btn.setAttribute('aria-selected', active ? 'true' : 'false');
+					});
+				}
+
+				var langSelect = document.getElementById('about-language-select');
+				var aboutPicker = document.getElementById('about-language-picker');
+				if (langSelect) {
+					langSelect.addEventListener('change', function () {
+						var lang = langSelect.value;
+						try {
+							localStorage.setItem(STORAGE_LANG_KEY, lang);
+						} catch (e) {}
+						applyLang(lang);
+					});
+				}
+				if (langSelect && aboutPicker) {
+					document.body.classList.add('lang-picker-enhanced');
+					var trigger = aboutPicker.querySelector('.topbar-lang-picker__trigger');
+					var closePicker = function () {
+						aboutPicker.classList.remove('is-open');
+						if (trigger) trigger.setAttribute('aria-expanded', 'false');
+					};
+					var openPicker = function () {
+						aboutPicker.classList.add('is-open');
+						if (trigger) trigger.setAttribute('aria-expanded', 'true');
+					};
+					if (trigger) {
+						trigger.addEventListener('click', function () {
+							if (aboutPicker.classList.contains('is-open')) closePicker();
+							else openPicker();
+						});
+					}
+					aboutPicker.querySelectorAll('[data-lang-option]').forEach(function (btn) {
+						btn.addEventListener('click', function () {
+							var next = btn.getAttribute('data-lang-option');
+							if (!next) return;
+							langSelect.value = next;
+							langSelect.dispatchEvent(new Event('change', { bubbles: true }));
+							closePicker();
+						});
+					});
+					document.addEventListener('click', function (event) {
+						if (!aboutPicker.contains(event.target)) closePicker();
+					});
+					document.addEventListener('keydown', function (event) {
+						if (event.key === 'Escape') closePicker();
+					});
+				}
+
+				var initialLang = 'en';
+				try {
+					var storedLang = localStorage.getItem(STORAGE_LANG_KEY);
+					if (storedLang && i18n[storedLang]) initialLang = storedLang;
+				} catch (e) {}
+				applyLang(initialLang);
+
 				var btn = document.getElementById('theme-toggle');
 				if (!btn) return;
 				btn.addEventListener('click', function () {
@@ -98,6 +243,14 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 						localStorage.setItem('jexon.theme.v1', next);
 					} catch (e) {}
 				});
+
+				if ('serviceWorker' in navigator) {
+					window.addEventListener('load', function () {
+						navigator.serviceWorker.register('/sw.js').catch(function () {
+							/* ignore */
+						});
+					});
+				}
 			})();
 		</script>
 	</body>

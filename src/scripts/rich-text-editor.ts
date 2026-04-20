@@ -7,9 +7,11 @@ import MarkdownIt from 'markdown-it';
 import TurndownService from 'turndown';
 
 import type { PublishOptions } from '../lib/content-model';
+import { uploadEditorImageToS3 } from '../lib/s3-client';
 
 const md = new MarkdownIt({ html: false, linkify: true, breaks: true });
 const turndown = new TurndownService({ headingStyle: 'atx' });
+const NETWORK_REQUIRED_MESSAGE = 'این عملیات نیاز به اینترنت دارد.';
 
 const editors = new Map<string, Editor>();
 
@@ -40,6 +42,7 @@ export function mountRichTextEditors(
 	container: HTMLElement,
 	deps: {
 		getUploadPayload: () => { s3KeyPrefix: string; s3: NonNullable<PublishOptions['s3']> };
+		getText?: (key: 'promptLinkUrl' | 'imageUploadFailed' | 'startWritingPlaceholder') => string;
 		onNotice: (message: string, type: 'ok' | 'error' | 'info') => void;
 	},
 ): void {
@@ -73,7 +76,7 @@ export function mountRichTextEditors(
 					inline: false,
 					allowBase64: false,
 				}),
-				Placeholder.configure({ placeholder: 'Start writing…' }),
+				Placeholder.configure({ placeholder: deps.getText?.('startWritingPlaceholder') || 'Start writing…' }),
 			],
 			editorProps: {
 				attributes: {
@@ -135,7 +138,7 @@ export function mountRichTextEditors(
 					break;
 				case 'link': {
 					const previousUrl = editor.getAttributes('link').href as string | undefined;
-					const url = window.prompt('Link URL', previousUrl ?? 'https://');
+					const url = window.prompt(deps.getText?.('promptLinkUrl') || 'Link URL', previousUrl ?? 'https://');
 					if (url === null) {
 						break;
 					}
@@ -156,31 +159,31 @@ export function mountRichTextEditors(
 						if (!file) {
 							return;
 						}
+						if (!navigator.onLine) {
+							deps.onNotice(NETWORK_REQUIRED_MESSAGE, 'error');
+							return;
+						}
 						try {
 							const payload = deps.getUploadPayload();
 							const dataBase64 = await readFileAsBase64(file);
-							const response = await fetch('/api/upload-asset', {
-								method: 'POST',
-								headers: { 'Content-Type': 'application/json' },
-								body: JSON.stringify({
-									fileName: file.name,
-									mimeType: file.type || 'application/octet-stream',
-									dataBase64,
-									options: {
-										s3KeyPrefix: payload.s3KeyPrefix,
-										s3: payload.s3,
-									},
-								}),
+							const data = await uploadEditorImageToS3({
+								fileName: file.name,
+								mimeType: file.type || 'application/octet-stream',
+								dataBase64,
+								s3KeyPrefix: payload.s3KeyPrefix,
+								s3: payload.s3,
 							});
-							const data = (await response.json()) as { error?: string; url?: string };
-							if (!response.ok) {
-								throw new Error(data.error ?? 'Upload failed');
-							}
 							if (data.url) {
 								editor.chain().focus().setImage({ src: data.url, alt: file.name }).run();
 							}
 						} catch (err) {
-							deps.onNotice(err instanceof Error ? err.message : 'Image upload failed', 'error');
+							const message =
+								!navigator.onLine
+									? NETWORK_REQUIRED_MESSAGE
+									: err instanceof Error
+										? err.message
+										: deps.getText?.('imageUploadFailed') || 'Image upload failed';
+							deps.onNotice(message, 'error');
 						}
 					};
 					input.click();

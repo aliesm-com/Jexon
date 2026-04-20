@@ -1,11 +1,10 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import node from '@astrojs/node';
 
 // https://astro.build/config
+const base = process.env.PUBLIC_BASE_PATH ?? '/';
+
 export default defineConfig({
-	output: 'server',
-	adapter: node({
-		mode: 'standalone',
-	}),
+	output: 'static',
+	base,
 });

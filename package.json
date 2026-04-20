@@ -12,7 +12,6 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/node": "^10.0.4",
     "@aws-sdk/client-s3": "^3.1030.0",
     "@tiptap/core": "^2.27.2",
     "@tiptap/extension-image": "^2.27.2",
@@ -27,5 +26,8 @@
     "turndown": "^7.2.4",
     "unified": "^11.0.5",
     "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/turndown": "^5.0.6"
   }
 }

@@ -19,7 +19,9 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 		<title>{siteTitle}</title>
 		<meta name="description" content={siteDescription} />
 		<meta name="keywords" content={siteKeywords} />
+		<meta name="theme-color" content="#1d4ed8" />
 		<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+		<link rel="manifest" href="/manifest.webmanifest" />
 		<meta property="og:type" content="website" />
 		<meta property="og:title" content={siteTitle} />
 		<meta property="og:description" content={siteDescription} />
@@ -46,12 +48,37 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 		</script>
 	</head>
 	<body>
+		<div id="startup-splash" class="startup-splash">
+			<div class="startup-splash__inner">
+				<h2 id="startup-splash-title" class="startup-splash__title" aria-label="Jexon"></h2>
+				<p class="startup-splash__byline">Powered By AliESM</p>
+			</div>
+		</div>
 		<div class="app-shell" id="app-shell">
 			<div class="app-main">
 				<header class="app-topbar">
 					<h1 class="topbar-title">Jexon</h1>
 					<div class="topbar-actions">
-						<a class="topbar-link" href="/about/" aria-label="Go to About page">About</a>
+						<select id="language-select" class="topbar-lang" aria-label="Language selector">
+							<option value="en">EN</option>
+							<option value="fr">FR</option>
+							<option value="es">ES</option>
+							<option value="ar">AR</option>
+							<option value="fa">FA</option>
+						</select>
+						<div class="topbar-lang-picker" id="language-picker">
+							<button type="button" class="topbar-lang-picker__trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Language selector">
+								<span data-lang-current>EN</span>
+							</button>
+							<ul class="topbar-lang-picker__menu" role="listbox" aria-label="Language selector">
+								<li><button type="button" data-lang-option="en">EN</button></li>
+								<li><button type="button" data-lang-option="fr">FR</button></li>
+								<li><button type="button" data-lang-option="es">ES</button></li>
+								<li><button type="button" data-lang-option="ar">AR</button></li>
+								<li><button type="button" data-lang-option="fa">FA</button></li>
+							</ul>
+						</div>
+						<a id="topbar-about-link" class="topbar-link" href="/about/" aria-label="Go to About page">About</a>
 						<button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Light / dark theme">
 							<svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 								<circle cx="12" cy="12" r="4"></circle>
@@ -99,11 +126,8 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 
 						<header id="wizard-hero" class="hero hero--compact" hidden>
 							<div class="hero-inner">
-								<p class="hero-badge">Content composer</p>
 								<h1>Jexon Content Composer</h1>
-								<p>
-									Build modules, create entries, normalize rich text to JSON, and publish to S3—with public asset URLs when configured.
-								</p>
+								<p class="hero-badge">Content composer</p>
 							</div>
 						</header>
 
@@ -199,6 +223,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 									<div class="row">
 										<button id="save-module-btn" type="button">Save Module</button>
 										<button id="reset-module-btn" type="button" class="btn--ghost">Reset Form</button>
+										<button id="export-workspace-btn-scratch" type="button" class="btn--outline">Export workspace (modules + S3)</button>
 									</div>
 
 									<h3>S3 Settings</h3>
@@ -327,13 +352,22 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 						</div>
 					</div>
 					<footer class="site-footer">
-						<p>
-							Powered By <a href="https://github.com/aliesm-com" target="_blank" rel="noopener noreferrer">AliESM</a>
+						<p id="footer-powered">
+							Powered By <a id="footer-ali-link" href="https://github.com/aliesm-com" target="_blank" rel="noopener noreferrer">AliESM</a>
 						</p>
 					</footer>
 				</div>
 			</div>
 		</div>
 		<script src="../scripts/app.ts"></script>
+		<script is:inline>
+			if ('serviceWorker' in navigator) {
+				window.addEventListener('load', () => {
+					navigator.serviceWorker.register('/sw.js').catch(() => {
+						/* ignore */
+					});
+				});
+			}
+		</script>
 	</body>
 </html>

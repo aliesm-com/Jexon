@@ -1,0 +1,18 @@
+{
+	"name": "Jexon Content Composer",
+	"short_name": "Jexon",
+	"description": "Build structured content modules, create entries, and publish JSON bundles.",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"background_color": "#0b1220",
+	"theme_color": "#1d4ed8",
+	"icons": [
+		{
+			"src": "/favicon.svg",
+			"type": "image/svg+xml",
+			"sizes": "any",
+			"purpose": "any"
+		}
+	]
+}

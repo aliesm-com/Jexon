@@ -20,46 +20,36 @@ npm run dev
 
 The app runs at `http://localhost:4321`.
 
-## S3 Environment Variables
+## Deploy to GitHub Pages
 
-If you want publish output uploaded to S3, set these variables:
+This repository includes a lightweight GitHub Actions workflow at `.github/workflows/deploy-pages.yml`.
 
-```bash
-S3_BUCKET_NAME=your-bucket
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=...
-AWS_SECRET_ACCESS_KEY=...
-S3_ENDPOINT=
-S3_FORCE_PATH_STYLE=false
-```
+Steps:
 
-`S3_ENDPOINT` is optional and useful for S3-compatible providers (for example MinIO or Cloudflare R2).
+1. Push your code to the `main` branch.
+2. In GitHub, go to **Settings -> Pages**.
+3. Set **Source** to **GitHub Actions**.
+4. The workflow deploys automatically on each push to `main`.
 
-## APIs
+Important:
 
-### `POST /api/normalize-richtext`
+- GitHub Pages is static hosting and does not let you manage Nginx directly.
+- This workflow builds Astro in static mode only for CI deploys; local/dev behavior stays unchanged.
 
-Input:
+## S3 Settings (Browser)
 
-```json
-{ "markdown": "# Hello\n[site](https://example.com)" }
-```
+The app can upload images/files and final bundle JSON directly to S3 from the browser.
 
-Output: normalized rich text document (`rtf-1`).
+Configure these values in the app UI (Modules step -> S3 Settings):
 
-### `POST /api/publish`
+- Bucket
+- Region
+- Access Key ID
+- Secret Access Key
+- Optional endpoint (for MinIO, Cloudflare R2, and similar)
+- Optional public base URL
 
-Input:
-
-- `modules`: array of module definitions
-- `entries`: array of draft entries
-- `options.uploadToS3`: when `true`, uploads final JSON to S3
-- `options.s3KeyPrefix`: key prefix for uploaded file in S3
-
-Output:
-
-- `bundle`: final publishable JSON bundle
-- `upload`: S3 upload metadata (when upload is enabled)
+Because this mode runs in frontend, S3 credentials are stored in local browser storage for the user session workflow.
 
 ## Final Output Shape
 
