@@ -385,6 +385,55 @@ html[data-theme='dark'] .theme-toggle .icon-moon {
 	font-weight: 800;
 	letter-spacing: -0.02em;
 	color: var(--text);
+	display: inline-flex;
+	align-items: center;
+	gap: 0.55rem;
+}
+
+.topbar-brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.3rem 0.55rem 0.3rem 0.35rem;
+	border-radius: 999px;
+	border: 1px solid transparent;
+	background: color-mix(in srgb, var(--surface) 80%, transparent);
+	color: inherit;
+	text-decoration: none;
+	transition:
+		background-color 0.22s ease,
+		border-color 0.22s ease,
+		box-shadow 0.22s ease,
+		transform 0.16s ease;
+}
+
+.topbar-brand:hover {
+	background: color-mix(in srgb, var(--accent-dim) 65%, var(--surface));
+	border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+	box-shadow: 0 8px 20px color-mix(in srgb, var(--accent-glow) 45%, transparent);
+	transform: translateY(-1px);
+}
+
+.topbar-brand:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 3px;
+	border-radius: 999px;
+}
+
+.brand-mark {
+	width: 1.62rem;
+	height: 1.62rem;
+	flex-shrink: 0;
+	border-radius: 0.45rem;
+	box-shadow:
+		0 1px 1px rgba(15, 23, 42, 0.18),
+		0 8px 16px color-mix(in srgb, var(--accent-glow) 42%, transparent);
+}
+
+.topbar-brand span {
+	font-weight: 800;
+	letter-spacing: -0.015em;
+	color: color-mix(in srgb, var(--text) 92%, var(--accent) 8%);
 }
 
 .app-topbar .theme-toggle {
@@ -2145,8 +2194,7 @@ html[dir='rtl'] .topbar-lang-picker__menu button {
 	color: var(--text);
 }
 
-#language-select option,
-#about-language-select option {
+#language-select option {
 	background: color-mix(in srgb, var(--surface) 88%, var(--surface-2) 12%);
 	color: var(--text);
 	padding: 0.6rem 0.75rem;
@@ -2156,64 +2204,11 @@ html[dir='rtl'] .topbar-lang-picker__menu button {
 	text-align: left;
 }
 
-html[dir='rtl'] #language-select option,
-html[dir='rtl'] #about-language-select option {
+html[dir='rtl'] #language-select option {
 	text-align: right;
 }
 
-/* About page language picker redesign */
-#about-language-picker .topbar-lang-picker__trigger {
-	border-radius: 12px;
-	border: 1px solid var(--border-strong);
-	background: var(--surface);
-	box-shadow: var(--shadow-sm);
-}
-
-#about-language-picker .topbar-lang-picker__trigger:hover {
-	border-color: var(--accent);
-	background: color-mix(in srgb, var(--surface) 90%, var(--accent) 10%);
-}
-
-#about-language-picker .topbar-lang-picker__trigger:focus-visible {
-	box-shadow: 0 0 0 3px var(--ring);
-}
-
-#about-language-picker .topbar-lang-picker__menu {
-	border-radius: 12px;
-	padding: 0.25rem 0;
-	border: 1px solid var(--border-strong);
-	background: var(--surface);
-	box-shadow: 0 12px 28px rgba(2, 6, 23, 0.22);
-}
-
-#about-language-picker .topbar-lang-picker__menu li + li {
-	border-top: 1px solid var(--border);
-}
-
-#about-language-picker .topbar-lang-picker__menu button {
-	padding: 0.58rem 0.9rem;
-	font-weight: 500;
-	border-radius: 0;
-}
-
-#about-language-picker .topbar-lang-picker__menu button:hover {
-	background: color-mix(in srgb, var(--accent) 8%, transparent);
-	color: var(--text);
-}
-
-#about-language-picker .topbar-lang-picker__menu button.is-active {
-	background: color-mix(in srgb, var(--accent) 12%, transparent);
-	color: var(--accent);
-	font-weight: 700;
-	box-shadow: inset 2px 0 0 var(--accent);
-}
-
-html[dir='rtl'] #about-language-picker .topbar-lang-picker__menu button.is-active {
-	box-shadow: inset -2px 0 0 var(--accent);
-}
-
-#language-select option:checked,
-#about-language-select option:checked {
+#language-select option:checked {
 	background: color-mix(in srgb, var(--accent) 20%, var(--surface) 80%);
 	color: var(--text);
 	font-weight: 700;
@@ -2285,6 +2280,51 @@ html[dir='rtl'] #about-language-picker .topbar-lang-picker__menu button.is-activ
 .about-back-link:hover {
 	background: var(--accent-dim);
 	border-color: var(--accent);
+}
+
+.about-author {
+	margin: 1.25rem 0 1.4rem;
+	padding: 1rem 1.05rem;
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	background: color-mix(in srgb, var(--surface-2) 90%, var(--surface));
+}
+
+.about-author h3 {
+	margin: 0 0 0.5rem;
+	font-size: 1rem;
+}
+
+.about-author p {
+	margin: 0 0 0.8rem;
+}
+
+.about-author-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.55rem;
+}
+
+.about-author-links a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 36px;
+	padding: 0 0.8rem;
+	border-radius: 9px;
+	border: 1px solid var(--border-strong);
+	background: var(--surface);
+	color: var(--text);
+	text-decoration: none;
+	font-size: 0.84rem;
+	font-weight: 600;
+	transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.about-author-links a:hover {
+	background: var(--accent-dim);
+	border-color: var(--accent);
+	color: var(--text);
 }
 
 /* Publish section spacing fix */

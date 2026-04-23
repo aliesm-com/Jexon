@@ -6,13 +6,14 @@ const siteDescription =
 	'Learn about Jexon Content Composer, its workflow for modules and entries, and how it helps teams publish structured JSON content efficiently.';
 const siteKeywords = 'About Jexon, content composer, structured JSON workflow, module builder, entry builder';
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : undefined;
+const basePath = import.meta.env.BASE_URL;
+const withBase = (path: string) => new URL(path.replace(/^\//, ''), `https://local${basePath}`).pathname;
 ---
 
 <html lang="en" dir="ltr">
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
+		<link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{siteTitle}</title>
@@ -20,7 +21,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 		<meta name="keywords" content={siteKeywords} />
 		<meta name="theme-color" content="#1d4ed8" />
 		<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
-		<link rel="manifest" href="/manifest.webmanifest" />
+		<link rel="manifest" href={withBase('/manifest.webmanifest')} />
 		<meta property="og:type" content="website" />
 		<meta property="og:title" content={siteTitle} />
 		<meta property="og:description" content={siteDescription} />
@@ -50,16 +51,21 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 		<div class="app-shell">
 			<div class="app-main">
 				<header class="app-topbar">
-					<h1 class="topbar-title">Jexon</h1>
+					<h1 class="topbar-title">
+						<a class="topbar-brand" href={withBase('/')} aria-label="Back to Home">
+							<img src={withBase('/favicon.svg')} alt="" class="brand-mark" />
+							<span>Jexon</span>
+						</a>
+					</h1>
 					<div class="topbar-actions">
-						<select id="about-language-select" class="topbar-lang" aria-label="Language selector">
+						<select id="language-select" class="topbar-lang" aria-label="Language selector">
 							<option value="en">EN</option>
 							<option value="fr">FR</option>
 							<option value="es">ES</option>
 							<option value="ar">AR</option>
 							<option value="fa">FA</option>
 						</select>
-						<div class="topbar-lang-picker" id="about-language-picker">
+						<div class="topbar-lang-picker" id="language-picker">
 							<button type="button" class="topbar-lang-picker__trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Language selector">
 								<span data-lang-current>EN</span>
 							</button>
@@ -71,7 +77,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 								<li><button type="button" data-lang-option="fa">FA</button></li>
 							</ul>
 						</div>
-						<a id="about-home-link" class="topbar-link" href="/" aria-label="Back to Home">Home</a>
+						<a id="about-home-link" class="topbar-link" href={withBase('/')} aria-label="Back to Home">Home</a>
 						<button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Light / dark theme">
 							<svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 								<circle cx="12" cy="12" r="4"></circle>
@@ -93,8 +99,19 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 						<p id="about-p2">
 							The editor supports rich text and optional S3-backed asset workflows, making it easier to move from draft content to production-ready bundles with predictable schemas.
 						</p>
+						<section class="about-author">
+							<h3 id="about-author-title">About the Author</h3>
+							<p id="about-author-p1">
+								Jexon is created and maintained by Ali Esmaeili (Alies), focused on building clean systems and practical developer tools.
+							</p>
+							<div class="about-author-links">
+								<a id="about-author-github" href="https://github.com/aliesm-com" target="_blank" rel="noopener noreferrer">GitHub</a>
+								<a id="about-author-website" href="https://aliesm.com" target="_blank" rel="noopener noreferrer">Website</a>
+								<a id="about-author-linkedin" href="https://linkedin.com/in/ali-esmaeili-b8b77177" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+							</div>
+						</section>
 						<div class="row">
-							<a href="/" id="about-back-link" class="btn--ghost about-back-link">← Back to Home</a>
+							<a href={withBase('/')} id="about-back-link" class="btn--ghost about-back-link">← Back to Home</a>
 						</div>
 					</section>
 					<footer class="site-footer">
@@ -105,7 +122,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 				</div>
 			</div>
 		</div>
-		<script is:inline>
+		<script is:inline define:vars={{ basePath }}>
 			(function () {
 				var STORAGE_LANG_KEY = 'jexon.lang.v1';
 				var i18n = {
@@ -114,6 +131,8 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 						aboutTitle: 'About Jexon',
 						aboutP1: 'Jexon Content Composer is a structured content workflow tool for building modules, capturing entries, and exporting versioned JSON for publishing pipelines.',
 						aboutP2: 'The editor supports rich text and optional S3-backed asset workflows, making it easier to move from draft content to production-ready bundles with predictable schemas.',
+						authorTitle: 'About the Author',
+						authorP1: 'Jexon is created and maintained by Ali Esmaeili (Alies), focused on building clean systems and practical developer tools.',
 						back: '← Back to Home',
 						powered: 'Powered By',
 					},
@@ -122,6 +141,8 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 						aboutTitle: 'A propos de Jexon',
 						aboutP1: 'Jexon Content Composer est un outil de workflow de contenu structure pour creer des modules, gerer des entrees et exporter des JSON versionnes pour la publication.',
 						aboutP2: "L'editeur prend en charge le texte riche et les workflows d'assets S3 optionnels pour passer plus facilement du brouillon au bundle pret pour la production.",
+						authorTitle: "A propos de l'auteur",
+						authorP1: "Jexon est cree et maintenu par Ali Esmaeili (Alies), avec un focus sur des systemes propres et des outils pratiques.",
 						back: "← Retour a l'accueil",
 						powered: 'Propulse par',
 					},
@@ -130,6 +151,8 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 						aboutTitle: 'Acerca de Jexon',
 						aboutP1: 'Jexon Content Composer es una herramienta de flujo de contenido estructurado para crear modulos, gestionar entradas y exportar JSON versionado para publicacion.',
 						aboutP2: 'El editor admite texto enriquecido y flujos de assets con S3 opcionales para pasar de borrador a bundle listo para produccion.',
+						authorTitle: 'Sobre el autor',
+						authorP1: 'Jexon esta creado y mantenido por Ali Esmaeili (Alies), enfocado en sistemas limpios y herramientas practicas.',
 						back: '← Volver al inicio',
 						powered: 'Impulsado por',
 					},
@@ -138,6 +161,8 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 						aboutTitle: 'حول Jexon',
 						aboutP1: 'Jexon Content Composer اداة لسير عمل المحتوى المنظم لبناء الوحدات وادارة الادخالات وتصدير JSON باصدار قابل للنشر.',
 						aboutP2: 'يدعم المحرر النص الغني ومسارات الassets الاختيارية عبر S3 لتسهيل الانتقال من المسودة الى حزمة جاهزة للانتاج.',
+						authorTitle: 'عن المؤلف',
+						authorP1: 'تم إنشاء Jexon وصيانته بواسطة Ali Esmaeili (Alies) مع تركيز على بناء أنظمة نظيفة وأدوات عملية.',
 						back: 'العودة الى الرئيسية ←',
 						powered: 'Powered By',
 					},
@@ -146,6 +171,8 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 						aboutTitle: 'درباره Jexon',
 						aboutP1: 'Jexon Content Composer ابزاری برای مدیریت محتوای ساختاریافته است که به شما کمک می‌کند ماژول بسازید، ورودی ثبت کنید و JSON نسخه‌دار خروجی بگیرید.',
 						aboutP2: 'این ویرایشگر از متن غنی و مسیرهای اختیاری S3 برای فایل‌ها پشتیبانی می‌کند تا از پیش‌نویس تا انتشار نهایی سریع‌تر پیش بروید.',
+						authorTitle: 'درباره نویسنده',
+						authorP1: 'Jexon توسط Ali Esmaeili (Alies) ساخته و نگهداری می‌شود؛ با تمرکز روی سیستم‌های تمیز و ابزارهای کاربردی توسعه.',
 						back: '← بازگشت به صفحه اصلی',
 						powered: 'Powered By',
 					},
@@ -160,15 +187,17 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 					document.getElementById('about-title').textContent = t.aboutTitle;
 					document.getElementById('about-p1').textContent = t.aboutP1;
 					document.getElementById('about-p2').textContent = t.aboutP2;
+					document.getElementById('about-author-title').textContent = t.authorTitle;
+					document.getElementById('about-author-p1').textContent = t.authorP1;
 					document.getElementById('about-back-link').textContent = t.back;
 					document.getElementById('about-footer-powered').childNodes[0].nodeValue = t.powered + ' ';
-					var select = document.getElementById('about-language-select');
+					var select = document.getElementById('language-select');
 					if (select) select.value = lang;
 					syncPicker(lang);
 				}
 
 				function syncPicker(lang) {
-					var picker = document.getElementById('about-language-picker');
+					var picker = document.getElementById('language-picker');
 					if (!picker) return;
 					var current = picker.querySelector('[data-lang-current]');
 					if (current) current.textContent = String(lang || '').toUpperCase();
@@ -179,8 +208,8 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 					});
 				}
 
-				var langSelect = document.getElementById('about-language-select');
-				var aboutPicker = document.getElementById('about-language-picker');
+				var langSelect = document.getElementById('language-select');
+				var aboutPicker = document.getElementById('language-picker');
 				if (langSelect) {
 					langSelect.addEventListener('change', function () {
 						var lang = langSelect.value;
@@ -246,7 +275,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 
 				if ('serviceWorker' in navigator) {
 					window.addEventListener('load', function () {
-						navigator.serviceWorker.register('/sw.js').catch(function () {
+						navigator.serviceWorker.register(basePath + 'sw.js').catch(function () {
 							/* ignore */
 						});
 					});

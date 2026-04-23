@@ -1,5 +1,7 @@
 # Jexon Content Composer
 
+![Jexon logo](public/favicon.svg)
+
 Jexon is an Astro-based content composer for building reusable field modules, creating entries from those modules, converting rich text to normalized JSON, and publishing final bundles.
 
 ## Features

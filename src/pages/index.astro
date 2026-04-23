@@ -7,13 +7,14 @@ const siteDescription =
 const siteKeywords =
 	'Jexon, content composer, structured content, JSON schema, S3 publish, Astro content tool';
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : undefined;
+const basePath = import.meta.env.BASE_URL;
+const withBase = (path: string) => new URL(path.replace(/^\//, ''), `https://local${basePath}`).pathname;
 ---
 
 <html lang="en" dir="ltr">
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
+		<link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{siteTitle}</title>
@@ -21,7 +22,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 		<meta name="keywords" content={siteKeywords} />
 		<meta name="theme-color" content="#1d4ed8" />
 		<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
-		<link rel="manifest" href="/manifest.webmanifest" />
+		<link rel="manifest" href={withBase('/manifest.webmanifest')} />
 		<meta property="og:type" content="website" />
 		<meta property="og:title" content={siteTitle} />
 		<meta property="og:description" content={siteDescription} />
@@ -57,7 +58,12 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 		<div class="app-shell" id="app-shell">
 			<div class="app-main">
 				<header class="app-topbar">
-					<h1 class="topbar-title">Jexon</h1>
+					<h1 class="topbar-title">
+						<a class="topbar-brand" href={withBase('/')} aria-label="Go to Home page">
+							<img src={withBase('/favicon.svg')} alt="" class="brand-mark" />
+							<span>Jexon</span>
+						</a>
+					</h1>
 					<div class="topbar-actions">
 						<select id="language-select" class="topbar-lang" aria-label="Language selector">
 							<option value="en">EN</option>
@@ -78,7 +84,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 								<li><button type="button" data-lang-option="fa">FA</button></li>
 							</ul>
 						</div>
-						<a id="topbar-about-link" class="topbar-link" href="/about/" aria-label="Go to About page">About</a>
+						<a id="topbar-about-link" class="topbar-link" href={withBase('/about/')} aria-label="Go to About page">About</a>
 						<button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Light / dark theme">
 							<svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 								<circle cx="12" cy="12" r="4"></circle>
@@ -360,10 +366,10 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 			</div>
 		</div>
 		<script src="../scripts/app.ts"></script>
-		<script is:inline>
+		<script is:inline define:vars={{ basePath }}>
 			if ('serviceWorker' in navigator) {
 				window.addEventListener('load', () => {
-					navigator.serviceWorker.register('/sw.js').catch(() => {
+					navigator.serviceWorker.register(`${basePath}sw.js`).catch(() => {
 						/* ignore */
 					});
 				});
