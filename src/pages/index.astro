@@ -225,6 +225,7 @@ const withBase = (path: string) => new URL(path.replace(/^\//, ''), `https://loc
 										<button id="add-field-btn" type="button">Add Field</button>
 										<button id="clear-fields-btn" type="button" class="btn--ghost">Clear Fields</button>
 									</div>
+									<div id="field-preset-list" class="preset-template-list"></div>
 									<div id="draft-field-list" class="chip-list"></div>
 									<div class="row">
 										<button id="save-module-btn" type="button">Save Module</button>
@@ -284,7 +285,18 @@ const withBase = (path: string) => new URL(path.replace(/^\//, ''), `https://loc
 									</details>
 								</div>
 
-								<h3>Saved Modules</h3>
+								<div class="row row--between">
+									<h3>Saved Modules</h3>
+									<label class="inline-control" for="module-sort-select">
+										<span>Sort</span>
+										<select id="module-sort-select">
+											<option id="module-sort-newest" value="newest">Newest</option>
+											<option id="module-sort-oldest" value="oldest">Oldest</option>
+											<option id="module-sort-name-asc" value="name-asc">Name A-Z</option>
+											<option id="module-sort-name-desc" value="name-desc">Name Z-A</option>
+										</select>
+									</label>
+								</div>
 								<div id="module-list" class="card-list"></div>
 
 								<div class="wizard-nav">
@@ -316,7 +328,18 @@ const withBase = (path: string) => new URL(path.replace(/^\//, ''), `https://loc
 									<button id="add-entry-btn" type="button">Add Entry</button>
 								</div>
 
-								<h3>Saved Entries</h3>
+								<div class="row row--between">
+									<h3>Saved Entries</h3>
+									<label class="inline-control" for="entry-sort-select">
+										<span>Sort</span>
+										<select id="entry-sort-select">
+											<option id="entry-sort-newest" value="newest">Newest</option>
+											<option id="entry-sort-oldest" value="oldest">Oldest</option>
+											<option id="entry-sort-title-asc" value="title-asc">Title A-Z</option>
+											<option id="entry-sort-title-desc" value="title-desc">Title Z-A</option>
+										</select>
+									</label>
+								</div>
 								<div id="entry-list" class="card-list"></div>
 
 								<div class="wizard-nav">

@@ -49,6 +49,90 @@ interface StoredS3Settings {
 
 type NoticeType = 'ok' | 'error' | 'info';
 
+type FieldPresetId =
+	| 'blogPost'
+	| 'seo'
+	| 'product'
+	| 'faq'
+	| 'podcast'
+	| 'landingPage'
+	| 'portfolio'
+	| 'newsArticle';
+
+interface FieldPresetTemplate {
+	id: FieldPresetId;
+	fieldId: string;
+	label: string;
+	type: FieldDefinition['type'];
+	required?: boolean;
+	helpText?: string;
+}
+
+const FIELD_PRESET_TEMPLATES: ReadonlyArray<FieldPresetTemplate> = [
+	{ id: 'blogPost', fieldId: 'title', label: 'Title', type: 'text', required: true },
+	{ id: 'blogPost', fieldId: 'slug', label: 'Slug', type: 'text', required: true, helpText: 'URL-friendly slug' },
+	{ id: 'blogPost', fieldId: 'excerpt', label: 'Excerpt', type: 'textarea' },
+	{ id: 'blogPost', fieldId: 'content', label: 'Content', type: 'richText', required: true },
+	{ id: 'blogPost', fieldId: 'author', label: 'Author', type: 'text' },
+	{ id: 'blogPost', fieldId: 'published_at', label: 'Published At', type: 'date' },
+	{ id: 'blogPost', fieldId: 'cover_image', label: 'Cover Image', type: 'file' },
+
+	{ id: 'seo', fieldId: 'seo_title', label: 'SEO Title', type: 'text' },
+	{ id: 'seo', fieldId: 'seo_description', label: 'SEO Description', type: 'textarea' },
+	{ id: 'seo', fieldId: 'canonical_url', label: 'Canonical URL', type: 'url' },
+	{ id: 'seo', fieldId: 'og_image', label: 'OpenGraph Image', type: 'file' },
+	{ id: 'seo', fieldId: 'indexable', label: 'Indexable', type: 'boolean' },
+
+	{ id: 'product', fieldId: 'product_name', label: 'Product Name', type: 'text', required: true },
+	{ id: 'product', fieldId: 'price', label: 'Price', type: 'number', required: true },
+	{ id: 'product', fieldId: 'currency', label: 'Currency', type: 'text' },
+	{ id: 'product', fieldId: 'description', label: 'Description', type: 'textarea' },
+	{ id: 'product', fieldId: 'in_stock', label: 'In Stock', type: 'boolean' },
+	{ id: 'product', fieldId: 'product_image', label: 'Product Image', type: 'file' },
+
+	{ id: 'faq', fieldId: 'question', label: 'Question', type: 'text', required: true },
+	{ id: 'faq', fieldId: 'answer', label: 'Answer', type: 'richText', required: true },
+	{ id: 'faq', fieldId: 'category', label: 'Category', type: 'text' },
+
+	{ id: 'podcast', fieldId: 'episode_title', label: 'Episode Title', type: 'text', required: true },
+	{ id: 'podcast', fieldId: 'episode_number', label: 'Episode Number', type: 'number' },
+	{ id: 'podcast', fieldId: 'show_name', label: 'Show Name', type: 'text', required: true },
+	{ id: 'podcast', fieldId: 'host', label: 'Host', type: 'text' },
+	{ id: 'podcast', fieldId: 'guest', label: 'Guest', type: 'text' },
+	{ id: 'podcast', fieldId: 'summary', label: 'Summary', type: 'textarea' },
+	{ id: 'podcast', fieldId: 'show_notes', label: 'Show Notes', type: 'richText' },
+	{ id: 'podcast', fieldId: 'audio_file', label: 'Audio File', type: 'file', required: true },
+	{ id: 'podcast', fieldId: 'cover_art', label: 'Cover Art', type: 'file' },
+	{ id: 'podcast', fieldId: 'duration_minutes', label: 'Duration (minutes)', type: 'number' },
+	{ id: 'podcast', fieldId: 'published_at', label: 'Published At', type: 'date' },
+
+	{ id: 'landingPage', fieldId: 'headline', label: 'Headline', type: 'text', required: true },
+	{ id: 'landingPage', fieldId: 'subheadline', label: 'Subheadline', type: 'textarea' },
+	{ id: 'landingPage', fieldId: 'hero_image', label: 'Hero Image', type: 'file' },
+	{ id: 'landingPage', fieldId: 'primary_cta_label', label: 'Primary CTA Label', type: 'text' },
+	{ id: 'landingPage', fieldId: 'primary_cta_url', label: 'Primary CTA URL', type: 'url' },
+	{ id: 'landingPage', fieldId: 'features', label: 'Features', type: 'richText' },
+	{ id: 'landingPage', fieldId: 'testimonials', label: 'Testimonials', type: 'richText' },
+
+	{ id: 'portfolio', fieldId: 'project_title', label: 'Project Title', type: 'text', required: true },
+	{ id: 'portfolio', fieldId: 'slug', label: 'Slug', type: 'text', required: true },
+	{ id: 'portfolio', fieldId: 'summary', label: 'Summary', type: 'textarea' },
+	{ id: 'portfolio', fieldId: 'description', label: 'Description', type: 'richText' },
+	{ id: 'portfolio', fieldId: 'thumbnail', label: 'Thumbnail', type: 'file' },
+	{ id: 'portfolio', fieldId: 'project_url', label: 'Project URL', type: 'url' },
+	{ id: 'portfolio', fieldId: 'repository_url', label: 'Repository URL', type: 'url' },
+	{ id: 'portfolio', fieldId: 'published_at', label: 'Published At', type: 'date' },
+
+	{ id: 'newsArticle', fieldId: 'headline', label: 'Headline', type: 'text', required: true },
+	{ id: 'newsArticle', fieldId: 'slug', label: 'Slug', type: 'text', required: true },
+	{ id: 'newsArticle', fieldId: 'deck', label: 'Deck', type: 'textarea' },
+	{ id: 'newsArticle', fieldId: 'body', label: 'Body', type: 'richText', required: true },
+	{ id: 'newsArticle', fieldId: 'author', label: 'Author', type: 'text' },
+	{ id: 'newsArticle', fieldId: 'source_url', label: 'Source URL', type: 'url' },
+	{ id: 'newsArticle', fieldId: 'featured_image', label: 'Featured Image', type: 'file' },
+	{ id: 'newsArticle', fieldId: 'published_at', label: 'Published At', type: 'date' },
+];
+
 const moduleIdInput = byId<HTMLInputElement>('module-id');
 const moduleNameInput = byId<HTMLInputElement>('module-name');
 const moduleDescriptionInput = byId<HTMLInputElement>('module-description');
@@ -57,13 +141,16 @@ const fieldLabelInput = byId<HTMLInputElement>('field-label');
 const fieldTypeInput = byId<HTMLSelectElement>('field-type');
 const fieldHelpInput = byId<HTMLInputElement>('field-help');
 const fieldRequiredInput = byId<HTMLInputElement>('field-required');
+const fieldPresetList = byId<HTMLDivElement>('field-preset-list');
 const draftFieldList = byId<HTMLDivElement>('draft-field-list');
 const moduleList = byId<HTMLDivElement>('module-list');
+const moduleSortSelect = byId<HTMLSelectElement>('module-sort-select');
 const moduleImportInput = byId<HTMLTextAreaElement>('module-import');
 const entryModuleSelect = byId<HTMLSelectElement>('entry-module-select');
 const entryTitleInput = byId<HTMLInputElement>('entry-title');
 const entryFieldContainer = byId<HTMLDivElement>('entry-field-container');
 const entryList = byId<HTMLDivElement>('entry-list');
+const entrySortSelect = byId<HTMLSelectElement>('entry-sort-select');
 const publishOutput = byId<HTMLTextAreaElement>('publish-output');
 const publishStatus = byId<HTMLParagraphElement>('publish-status');
 const s3Toggle = byId<HTMLInputElement>('publish-upload-s3');
@@ -84,6 +171,8 @@ let editingModuleId: string | null = null;
 let currentWizardStep: 0 | 1 | 2 | 3 = 0;
 let currentStartMode: 'import' | 'scratch' = 'scratch';
 let currentLanguage: SupportedLang = 'en';
+let moduleSortMode: 'newest' | 'oldest' | 'name-asc' | 'name-desc' = 'newest';
+let entrySortMode: 'newest' | 'oldest' | 'title-asc' | 'title-desc' = 'newest';
 
 const I18N_TEXT: Record<
 	SupportedLang,
@@ -163,16 +252,16 @@ const I18N_TEXT: Record<
 		fieldDraft: 'Field Draft',
 		s3Settings: 'S3 Settings',
 		savedModules: 'Saved Modules',
-		backStart: '? Back to start',
-		continueEntries: 'Continue to entries ?',
+		backStart: '← Back to start',
+		continueEntries: 'Continue to entries →',
 		entriesTitle: 'Entry Builder',
 		entriesIntro: 'Create entries from a module. Rich text uses a visual editor (headings, bold, lists, links, images). Images upload to S3 when credentials are set in the Modules step.',
 		selectModule: 'Select Module',
 		entryTitle: 'Entry Title',
 		addEntry: 'Add Entry',
 		savedEntries: 'Saved Entries',
-		backModules: '? Modules',
-		continuePublish: 'Continue to publish ?',
+		backModules: '← Modules',
+		continuePublish: 'Continue to publish →',
 		publishTitle: 'Publish',
 		publishIntro: 'Build versioned JSON (bundle-1). Configure S3 in the Modules step (embedded in exports). Rich text and file fields use public S3 objects when credentials are set.',
 		uploadBundle: 'Also upload bundle JSON to S3',
@@ -180,7 +269,7 @@ const I18N_TEXT: Record<
 		buildFinalJson: 'Build Final JSON',
 		clearLocalData: 'Clear Local Data',
 		publishedJson: 'Published JSON',
-		backEntries: '? Entries',
+		backEntries: '← Entries',
 		poweredBy: 'Powered By',
 		readyNotice: 'Ready. Choose Import or New, then modules, entries, and publish.',
 	},
@@ -211,16 +300,16 @@ const I18N_TEXT: Record<
 		fieldDraft: 'Brouillon des champs',
 		s3Settings: 'Parametres S3',
 		savedModules: 'Modules enregistres',
-		backStart: '? Retour au debut',
-		continueEntries: 'Continuer vers les entrees ?',
+		backStart: '← Retour au debut',
+		continueEntries: 'Continuer vers les entrees →',
 		entriesTitle: "Constructeur d'entrees",
 		entriesIntro: "Creez des entrees depuis un module. Le rich text utilise un editeur visuel avec upload d'images vers S3.",
 		selectModule: 'Selectionner module',
 		entryTitle: "Titre de l'entree",
 		addEntry: 'Ajouter entree',
 		savedEntries: 'Entrees enregistrees',
-		backModules: '? Modules',
-		continuePublish: 'Continuer vers publication ?',
+		backModules: '← Modules',
+		continuePublish: 'Continuer vers publication →',
 		publishTitle: 'Publication',
 		publishIntro: 'Generez un JSON versionne (bundle-1) et publiez avec options S3.',
 		uploadBundle: 'Televerser aussi le bundle JSON vers S3',
@@ -228,7 +317,7 @@ const I18N_TEXT: Record<
 		buildFinalJson: 'Generer JSON final',
 		clearLocalData: 'Effacer donnees locales',
 		publishedJson: 'JSON publie',
-		backEntries: '? Entrees',
+		backEntries: '← Entrees',
 		poweredBy: 'Propulse par',
 		readyNotice: 'Pret. Choisissez Import ou Nouveau, puis modules, entrees et publication.',
 	},
@@ -259,16 +348,16 @@ const I18N_TEXT: Record<
 		fieldDraft: 'Borrador de campos',
 		s3Settings: 'Configuracion S3',
 		savedModules: 'Modulos guardados',
-		backStart: '? Volver al inicio',
-		continueEntries: 'Continuar a entradas ?',
+		backStart: '← Volver al inicio',
+		continueEntries: 'Continuar a entradas →',
 		entriesTitle: 'Constructor de entradas',
 		entriesIntro: 'Crea entradas desde un modulo. El rich text usa editor visual e imagenes en S3.',
 		selectModule: 'Seleccionar modulo',
 		entryTitle: 'Titulo de entrada',
 		addEntry: 'Agregar entrada',
 		savedEntries: 'Entradas guardadas',
-		backModules: '? Modulos',
-		continuePublish: 'Continuar a publicar ?',
+		backModules: '← Modulos',
+		continuePublish: 'Continuar a publicar →',
 		publishTitle: 'Publicar',
 		publishIntro: 'Genera JSON versionado (bundle-1) y publica con opciones S3.',
 		uploadBundle: 'Subir tambien bundle JSON a S3',
@@ -276,7 +365,7 @@ const I18N_TEXT: Record<
 		buildFinalJson: 'Generar JSON final',
 		clearLocalData: 'Limpiar datos locales',
 		publishedJson: 'JSON publicado',
-		backEntries: '? Entradas',
+		backEntries: '← Entradas',
 		poweredBy: 'Powered By',
 		readyNotice: 'Listo. Elige Importar o Nuevo, luego modulos, entradas y publicar.',
 	},
@@ -396,6 +485,22 @@ type UIStrings = {
 		required: string;
 		addField: string;
 		clearFields: string;
+		fieldTemplatesTitle: string;
+		templateBlogPost: string;
+		templateSeoPack: string;
+		templateProduct: string;
+		templateFaq: string;
+		templatePodcast: string;
+		templateLandingPage: string;
+		templatePortfolio: string;
+		templateNewsArticle: string;
+		sortLabel: string;
+		sortNewest: string;
+		sortOldest: string;
+		sortNameAsc: string;
+		sortNameDesc: string;
+		sortTitleAsc: string;
+		sortTitleDesc: string;
 		saveModule: string;
 		resetForm: string;
 		s3UsedLead: string;
@@ -443,6 +548,8 @@ type UIStrings = {
 		noticeFieldExists: string;
 		noticeFieldAdded: string;
 		noticeFieldListCleared: string;
+		noticePresetAdded: string;
+		noticePresetAlreadyExists: string;
 		noticeModuleIdNameRequired: string;
 		noticeModuleNeedsField: string;
 		noticeModuleExists: string;
@@ -492,6 +599,22 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		required: 'Required',
 		addField: 'Add Field',
 		clearFields: 'Clear Fields',
+		fieldTemplatesTitle: 'Quick field templates',
+		templateBlogPost: 'Blog Post',
+		templateSeoPack: 'SEO Pack',
+		templateProduct: 'Product',
+		templateFaq: 'FAQ',
+		templatePodcast: 'Podcast',
+		templateLandingPage: 'Landing Page',
+		templatePortfolio: 'Portfolio',
+		templateNewsArticle: 'News Article',
+		sortLabel: 'Sort',
+		sortNewest: 'Newest',
+		sortOldest: 'Oldest',
+		sortNameAsc: 'Name A-Z',
+		sortNameDesc: 'Name Z-A',
+		sortTitleAsc: 'Title A-Z',
+		sortTitleDesc: 'Title Z-A',
 		saveModule: 'Save Module',
 		resetForm: 'Reset Form',
 		s3UsedLead: 'Used for asset uploads and publish. These values are also embedded in exports.',
@@ -539,6 +662,8 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		noticeFieldExists: "A field with id '{id}' already exists in this draft.",
 		noticeFieldAdded: "Field '{id}' added.",
 		noticeFieldListCleared: 'Draft field list cleared.',
+		noticePresetAdded: "Template '{name}' added ({count} field(s)).",
+		noticePresetAlreadyExists: "Template '{name}' is already in draft.",
 		noticeModuleIdNameRequired: 'Module ID and Module Name are required.',
 		noticeModuleNeedsField: 'At least one field is required for a module.',
 		noticeModuleExists: "Module '{id}' already exists.",
@@ -1166,6 +1291,11 @@ function applyLanguage(lang: SupportedLang) {
 	setText('#save-s3-settings-btn', u.saveS3Local);
 	setPlaceholder('#entry-title', u.entryTitlePlaceholder);
 	setText('#section-modules > h3', t.savedModules);
+	setText('label[for="module-sort-select"] span', u.sortLabel);
+	setText('#module-sort-newest', u.sortNewest);
+	setText('#module-sort-oldest', u.sortOldest);
+	setText('#module-sort-name-asc', u.sortNameAsc);
+	setText('#module-sort-name-desc', u.sortNameDesc);
 	setText('[data-wizard-back]:nth-of-type(1)', t.backStart);
 	setText('[data-wizard-next="2"]', t.continueEntries);
 	setSectionTitle('#section-entries h2', '3', t.entriesTitle);
@@ -1174,6 +1304,11 @@ function applyLanguage(lang: SupportedLang) {
 	setText('label[for="entry-title"] span', t.entryTitle);
 	setText('#add-entry-btn', t.addEntry);
 	setText('#section-entries > h3', t.savedEntries);
+	setText('label[for="entry-sort-select"] span', u.sortLabel);
+	setText('#entry-sort-newest', u.sortNewest);
+	setText('#entry-sort-oldest', u.sortOldest);
+	setText('#entry-sort-title-asc', u.sortTitleAsc);
+	setText('#entry-sort-title-desc', u.sortTitleDesc);
 	setText('#section-entries [data-wizard-back]', t.backModules);
 	setText('#section-entries [data-wizard-next]', t.continuePublish);
 	setSectionTitle('#section-publish h2', '4', t.publishTitle);
@@ -1445,6 +1580,8 @@ function initWizard(): void {
 function bindEvents() {
 	byId<HTMLButtonElement>('add-field-btn').addEventListener('click', addFieldToDraft);
 	byId<HTMLButtonElement>('clear-fields-btn').addEventListener('click', clearFieldDraft);
+	draftFieldList.addEventListener('click', handleDraftFieldActions);
+	fieldPresetList.addEventListener('click', handleFieldPresetClick);
 	byId<HTMLButtonElement>('save-module-btn').addEventListener('click', saveModule);
 	byId<HTMLButtonElement>('reset-module-btn').addEventListener('click', resetModuleForm);
 	byId<HTMLButtonElement>('import-module-btn').addEventListener('click', importModulesFromJson);
@@ -1454,6 +1591,14 @@ function bindEvents() {
 	byId<HTMLButtonElement>('save-s3-settings-btn').addEventListener('click', saveS3SettingsToStorage);
 	byId<HTMLButtonElement>('publish-btn').addEventListener('click', publishContent);
 	byId<HTMLButtonElement>('clear-storage-btn').addEventListener('click', clearAllLocalData);
+	moduleSortSelect.addEventListener('change', () => {
+		moduleSortMode = moduleSortSelect.value as typeof moduleSortMode;
+		renderModules();
+	});
+	entrySortSelect.addEventListener('change', () => {
+		entrySortMode = entrySortSelect.value as typeof entrySortMode;
+		renderEntries();
+	});
 
 	moduleList.addEventListener('click', handleModuleActions);
 	entryList.addEventListener('click', handleEntryActions);
@@ -1624,6 +1769,101 @@ function clearFieldDraft() {
 	draftFields = [];
 	renderDraftFields();
 	setNotice(tUi('noticeFieldListCleared'), 'info');
+}
+
+function handleDraftFieldActions(event: Event) {
+	const target = event.target as HTMLElement;
+	const button = target.closest<HTMLButtonElement>('button[data-draft-action]');
+	if (!button) {
+		return;
+	}
+	const action = button.dataset.draftAction;
+	const rawIndex = button.dataset.draftIndex;
+	const index = rawIndex ? Number(rawIndex) : NaN;
+	if (!action || Number.isNaN(index) || index < 0 || index >= draftFields.length) {
+		return;
+	}
+
+	if (action === 'up' && index > 0) {
+		const temp = draftFields[index - 1];
+		draftFields[index - 1] = draftFields[index];
+		draftFields[index] = temp;
+		renderDraftFields();
+		return;
+	}
+
+	if (action === 'down' && index < draftFields.length - 1) {
+		const temp = draftFields[index + 1];
+		draftFields[index + 1] = draftFields[index];
+		draftFields[index] = temp;
+		renderDraftFields();
+	}
+}
+
+function handleFieldPresetClick(event: Event) {
+	const target = event.target as HTMLElement;
+	const button = target.closest<HTMLButtonElement>('button[data-field-preset]');
+	if (!button) {
+		return;
+	}
+	const presetId = button.dataset.fieldPreset as FieldPresetId | undefined;
+	if (!presetId) {
+		return;
+	}
+	applyFieldPreset(presetId);
+}
+
+function applyFieldPreset(presetId: FieldPresetId) {
+	const presetFields = FIELD_PRESET_TEMPLATES.filter((item) => item.id === presetId);
+	if (!presetFields.length) {
+		return;
+	}
+
+	let addedCount = 0;
+	for (const preset of presetFields) {
+		const id = toId(preset.fieldId);
+		if (!id || draftFields.some((field) => field.id === id)) {
+			continue;
+		}
+		draftFields.push({
+			id,
+			label: preset.label,
+			type: preset.type,
+			required: Boolean(preset.required),
+			helpText: preset.helpText,
+		});
+		addedCount += 1;
+	}
+
+	renderDraftFields();
+	if (addedCount > 0) {
+		setNotice(tUi('noticePresetAdded', { name: getFieldPresetLabel(presetId), count: addedCount }), 'ok');
+		return;
+	}
+	setNotice(tUi('noticePresetAlreadyExists', { name: getFieldPresetLabel(presetId) }), 'info');
+}
+
+function getFieldPresetLabel(presetId: FieldPresetId): string {
+	switch (presetId) {
+		case 'blogPost':
+			return tUi('templateBlogPost');
+		case 'seo':
+			return tUi('templateSeoPack');
+		case 'product':
+			return tUi('templateProduct');
+		case 'faq':
+			return tUi('templateFaq');
+		case 'podcast':
+			return tUi('templatePodcast');
+		case 'landingPage':
+			return tUi('templateLandingPage');
+		case 'portfolio':
+			return tUi('templatePortfolio');
+		case 'newsArticle':
+			return tUi('templateNewsArticle');
+		default:
+			return presetId;
+	}
 }
 
 function saveModule() {
@@ -2336,10 +2576,34 @@ function clearAllLocalData() {
 }
 
 function renderAll() {
+	renderFieldPresetButtons();
 	renderDraftFields();
 	renderModules();
 	renderEntries();
 	refreshEntryFieldsIfActive();
+}
+
+function renderFieldPresetButtons() {
+	const presets: FieldPresetId[] = [
+		'blogPost',
+		'seo',
+		'product',
+		'faq',
+		'podcast',
+		'landingPage',
+		'portfolio',
+		'newsArticle',
+	];
+	const buttons = presets
+		.map(
+			(preset) =>
+				`<button type="button" class="btn--outline preset-template-btn" data-field-preset="${escapeHtml(preset)}">+ ${escapeHtml(getFieldPresetLabel(preset))}</button>`,
+		)
+		.join('');
+	fieldPresetList.innerHTML = `
+		<p class="preset-template-label">${escapeHtml(tUi('fieldTemplatesTitle'))}</p>
+		<div class="preset-template-actions">${buttons}</div>
+	`;
 }
 
 function renderDraftFields() {
@@ -2351,9 +2615,15 @@ function renderDraftFields() {
 
 	draftFieldList.innerHTML = draftFields
 		.map(
-			(field) => `
+			(field, index) => `
 			<div class="chip">
-				<strong>${escapeHtml(field.id)}</strong>
+				<div class="chip-row">
+					<strong>${escapeHtml(field.id)}</strong>
+					<div class="chip-actions">
+						<button type="button" class="chip-move-btn" data-draft-action="up" data-draft-index="${index}" aria-label="Move up" title="Move up" ${index === 0 ? 'disabled' : ''}>↑</button>
+						<button type="button" class="chip-move-btn" data-draft-action="down" data-draft-index="${index}" aria-label="Move down" title="Move down" ${index === draftFields.length - 1 ? 'disabled' : ''}>↓</button>
+					</div>
+				</div>
 				<span>${escapeHtml(field.label)}</span>
 				<small>${escapeHtml(field.type)}${field.required ? ` - ${escapeHtml(u.required.toLowerCase())}` : ''}</small>
 			</div>
@@ -2364,13 +2634,15 @@ function renderDraftFields() {
 
 function renderModules() {
 	const u = uiText();
+	moduleSortSelect.value = moduleSortMode;
 	if (!modules.length) {
 		moduleList.innerHTML = `<p class="muted">${escapeHtml(u.noModulesSaved)}</p>`;
 		entryModuleSelect.innerHTML = `<option value="">${escapeHtml(u.noModulesAvailable)}</option>`;
 		return;
 	}
 
-	moduleList.innerHTML = modules
+	const visibleModules = sortModulesForView(modules, moduleSortMode);
+	moduleList.innerHTML = visibleModules
 		.map(
 			(module) => `
 			<article class="card">
@@ -2403,14 +2675,34 @@ function renderModules() {
 	}
 }
 
+function sortModulesForView(
+	modulesInput: FieldModule[],
+	mode: 'newest' | 'oldest' | 'name-asc' | 'name-desc',
+): FieldModule[] {
+	const list = [...modulesInput];
+	switch (mode) {
+		case 'oldest':
+			return list.reverse();
+		case 'name-asc':
+			return list.sort((a, b) => a.name.localeCompare(b.name));
+		case 'name-desc':
+			return list.sort((a, b) => b.name.localeCompare(a.name));
+		case 'newest':
+		default:
+			return list;
+	}
+}
+
 function renderEntries() {
 	const u = uiText();
+	entrySortSelect.value = entrySortMode;
 	if (!entries.length) {
 		entryList.innerHTML = `<p class="muted">${escapeHtml(u.noEntriesSavedYet)}</p>`;
 		return;
 	}
 
-	entryList.innerHTML = entries
+	const visibleEntries = sortEntriesForView(entries, entrySortMode);
+	entryList.innerHTML = visibleEntries
 		.map(
 			(entry) => `
 			<article class="card slim">
@@ -2424,6 +2716,24 @@ function renderEntries() {
 		`,
 		)
 		.join('');
+}
+
+function sortEntriesForView(
+	entriesInput: DraftEntry[],
+	mode: 'newest' | 'oldest' | 'title-asc' | 'title-desc',
+): DraftEntry[] {
+	const list = [...entriesInput];
+	switch (mode) {
+		case 'oldest':
+			return list.reverse();
+		case 'title-asc':
+			return list.sort((a, b) => a.title.localeCompare(b.title));
+		case 'title-desc':
+			return list.sort((a, b) => b.title.localeCompare(a.title));
+		case 'newest':
+		default:
+			return list;
+	}
 }
 
 function renderEntryFields() {

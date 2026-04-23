@@ -848,6 +848,30 @@ html[data-theme='dark'] .theme-toggle .icon-moon {
 	margin-bottom: var(--space-5);
 }
 
+.preset-template-list {
+	margin: 0.2rem 0 1rem;
+}
+
+.preset-template-label {
+	margin: 0 0 0.55rem;
+	font-size: 0.82rem;
+	font-weight: 700;
+	color: var(--text-muted);
+}
+
+.preset-template-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.preset-template-btn {
+	min-height: 38px !important;
+	padding: 0 0.8rem !important;
+	border-radius: 999px !important;
+	font-size: 0.82rem !important;
+}
+
 label span {
 	font-weight: 600;
 	font-size: 0.88rem;
@@ -996,6 +1020,36 @@ html[data-theme='dark'] button.btn--danger {
 	flex-wrap: wrap;
 	gap: var(--space-3);
 	align-items: center;
+}
+
+.row--between {
+	justify-content: space-between;
+}
+
+.row--between h3 {
+	margin: 0.2rem 0;
+}
+
+.inline-control {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+	margin-bottom: 0;
+}
+
+.inline-control span {
+	font-size: 0.78rem;
+	font-weight: 700;
+	color: var(--text-muted);
+}
+
+.inline-control select {
+	min-height: 36px;
+	width: auto;
+	min-width: 132px;
+	padding: 0 0.65rem;
+	border-radius: 9px;
+	font-size: 0.82rem;
 }
 
 .gap-sm {
@@ -1791,6 +1845,41 @@ textarea {
 .chip {
 	padding: 0.78rem 0.9rem;
 	border-radius: 12px;
+}
+
+.chip-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.55rem;
+}
+
+.chip-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.28rem;
+}
+
+.chip-move-btn {
+	min-height: 28px !important;
+	min-width: 28px;
+	padding: 0 !important;
+	border-radius: 8px !important;
+	border: 1px solid var(--border-strong) !important;
+	background: var(--surface) !important;
+	color: var(--text) !important;
+	font-size: 0.78rem !important;
+	box-shadow: none !important;
+}
+
+.chip-move-btn:hover:not(:disabled) {
+	border-color: var(--accent) !important;
+	background: var(--accent-dim) !important;
+}
+
+.chip-move-btn:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
 }
 
 .card {
