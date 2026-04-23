@@ -173,6 +173,7 @@ let currentStartMode: 'import' | 'scratch' = 'scratch';
 let currentLanguage: SupportedLang = 'en';
 let moduleSortMode: 'newest' | 'oldest' | 'name-asc' | 'name-desc' = 'newest';
 let entrySortMode: 'newest' | 'oldest' | 'title-asc' | 'title-desc' = 'newest';
+let draggingDraftFieldIndex: number | null = null;
 
 const I18N_TEXT: Record<
 	SupportedLang,
@@ -547,6 +548,7 @@ type UIStrings = {
 		noticeInvalidFieldType: string;
 		noticeFieldExists: string;
 		noticeFieldAdded: string;
+		noticeFieldDeleted: string;
 		noticeFieldListCleared: string;
 		noticePresetAdded: string;
 		noticePresetAlreadyExists: string;
@@ -661,6 +663,7 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		noticeInvalidFieldType: 'Invalid field type.',
 		noticeFieldExists: "A field with id '{id}' already exists in this draft.",
 		noticeFieldAdded: "Field '{id}' added.",
+		noticeFieldDeleted: "Field '{id}' deleted.",
 		noticeFieldListCleared: 'Draft field list cleared.',
 		noticePresetAdded: "Template '{name}' added ({count} field(s)).",
 		noticePresetAlreadyExists: "Template '{name}' is already in draft.",
@@ -1581,6 +1584,10 @@ function bindEvents() {
 	byId<HTMLButtonElement>('add-field-btn').addEventListener('click', addFieldToDraft);
 	byId<HTMLButtonElement>('clear-fields-btn').addEventListener('click', clearFieldDraft);
 	draftFieldList.addEventListener('click', handleDraftFieldActions);
+	draftFieldList.addEventListener('dragstart', handleDraftFieldDragStart);
+	draftFieldList.addEventListener('dragover', handleDraftFieldDragOver);
+	draftFieldList.addEventListener('drop', handleDraftFieldDrop);
+	draftFieldList.addEventListener('dragend', handleDraftFieldDragEnd);
 	fieldPresetList.addEventListener('click', handleFieldPresetClick);
 	byId<HTMLButtonElement>('save-module-btn').addEventListener('click', saveModule);
 	byId<HTMLButtonElement>('reset-module-btn').addEventListener('click', resetModuleForm);
@@ -1785,19 +1792,97 @@ function handleDraftFieldActions(event: Event) {
 	}
 
 	if (action === 'up' && index > 0) {
-		const temp = draftFields[index - 1];
-		draftFields[index - 1] = draftFields[index];
-		draftFields[index] = temp;
+		moveDraftField(index, index - 1);
 		renderDraftFields();
 		return;
 	}
 
 	if (action === 'down' && index < draftFields.length - 1) {
-		const temp = draftFields[index + 1];
-		draftFields[index + 1] = draftFields[index];
-		draftFields[index] = temp;
+		moveDraftField(index, index + 1);
 		renderDraftFields();
+		return;
 	}
+
+	if (action === 'delete') {
+		const [removed] = draftFields.splice(index, 1);
+		renderDraftFields();
+		if (removed) {
+			setNotice(tUi('noticeFieldDeleted', { id: removed.id }), 'info');
+		}
+	}
+}
+
+function handleDraftFieldDragStart(event: DragEvent) {
+	const target = event.target as HTMLElement;
+	const item = target.closest<HTMLElement>('[data-draft-item]');
+	if (!item) {
+		return;
+	}
+	const rawIndex = item.dataset.draftIndex;
+	const index = rawIndex ? Number(rawIndex) : NaN;
+	if (Number.isNaN(index) || index < 0 || index >= draftFields.length) {
+		return;
+	}
+	draggingDraftFieldIndex = index;
+	item.classList.add('is-dragging');
+	if (event.dataTransfer) {
+		event.dataTransfer.effectAllowed = 'move';
+		event.dataTransfer.setData('text/plain', String(index));
+	}
+}
+
+function handleDraftFieldDragOver(event: DragEvent) {
+	if (draggingDraftFieldIndex === null) {
+		return;
+	}
+	event.preventDefault();
+	const target = event.target as HTMLElement;
+	const item = target.closest<HTMLElement>('[data-draft-item]');
+	clearDraftDropTargets();
+	if (item) {
+		item.classList.add('is-drop-target');
+	}
+}
+
+function handleDraftFieldDrop(event: DragEvent) {
+	if (draggingDraftFieldIndex === null) {
+		return;
+	}
+	event.preventDefault();
+	const target = event.target as HTMLElement;
+	const item = target.closest<HTMLElement>('[data-draft-item]');
+	const rawIndex = item?.dataset.draftIndex;
+	const targetIndex = rawIndex ? Number(rawIndex) : NaN;
+	if (Number.isNaN(targetIndex) || targetIndex < 0 || targetIndex >= draftFields.length) {
+		handleDraftFieldDragEnd();
+		return;
+	}
+	if (targetIndex !== draggingDraftFieldIndex) {
+		moveDraftField(draggingDraftFieldIndex, targetIndex);
+	}
+	handleDraftFieldDragEnd();
+	renderDraftFields();
+}
+
+function handleDraftFieldDragEnd() {
+	draggingDraftFieldIndex = null;
+	draftFieldList.querySelectorAll('.is-dragging,.is-drop-target').forEach((el) => {
+		el.classList.remove('is-dragging', 'is-drop-target');
+	});
+}
+
+function clearDraftDropTargets() {
+	draftFieldList.querySelectorAll('.is-drop-target').forEach((el) => {
+		el.classList.remove('is-drop-target');
+	});
+}
+
+function moveDraftField(fromIndex: number, toIndex: number) {
+	if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0 || fromIndex >= draftFields.length || toIndex >= draftFields.length) {
+		return;
+	}
+	const [moved] = draftFields.splice(fromIndex, 1);
+	draftFields.splice(toIndex, 0, moved);
 }
 
 function handleFieldPresetClick(event: Event) {
@@ -2616,10 +2701,11 @@ function renderDraftFields() {
 	draftFieldList.innerHTML = draftFields
 		.map(
 			(field, index) => `
-			<div class="chip">
+			<div class="chip chip--draft" data-draft-item data-draft-index="${index}" draggable="true">
 				<div class="chip-row">
 					<strong>${escapeHtml(field.id)}</strong>
 					<div class="chip-actions">
+						<button type="button" class="chip-delete-btn" data-draft-action="delete" data-draft-index="${index}" aria-label="${escapeHtml(u.delete)}" title="${escapeHtml(u.delete)}">✕</button>
 						<button type="button" class="chip-move-btn" data-draft-action="up" data-draft-index="${index}" aria-label="Move up" title="Move up" ${index === 0 ? 'disabled' : ''}>↑</button>
 						<button type="button" class="chip-move-btn" data-draft-action="down" data-draft-index="${index}" aria-label="Move down" title="Move down" ${index === draftFields.length - 1 ? 'disabled' : ''}>↓</button>
 					</div>

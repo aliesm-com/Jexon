@@ -1847,6 +1847,25 @@ textarea {
 	border-radius: 12px;
 }
 
+.chip--draft {
+	cursor: grab;
+	user-select: none;
+}
+
+.chip--draft:active {
+	cursor: grabbing;
+}
+
+.chip--draft.is-dragging {
+	opacity: 0.45;
+	transform: scale(0.98);
+}
+
+.chip--draft.is-drop-target {
+	border-color: var(--accent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
 .chip-row {
 	display: flex;
 	align-items: center;
@@ -1858,6 +1877,23 @@ textarea {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.28rem;
+}
+
+.chip-delete-btn {
+	min-height: 28px !important;
+	min-width: 28px;
+	padding: 0 !important;
+	border-radius: 8px !important;
+	border: 1px solid var(--border-strong) !important;
+	background: var(--surface) !important;
+	color: var(--danger) !important;
+	font-size: 0.75rem !important;
+	box-shadow: none !important;
+}
+
+.chip-delete-btn:hover {
+	border-color: var(--danger) !important;
+	background: var(--danger-dim) !important;
 }
 
 .chip-move-btn {
