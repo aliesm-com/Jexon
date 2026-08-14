@@ -6,7 +6,7 @@ Jexon is an Astro-based content composer for building reusable field modules, cr
 
 ## Features
 
-- Modular field definitions (`text`, `textarea`, `url`, `number`, `boolean`, `date`, `richText`)
+- Modular field definitions (`text`, `textarea`, `url`, `number`, `boolean`, `date`, `richText`, `file`, `list`)
 - Module import/export with versioned JSON format (`module-1`)
 - Entry creation based on saved modules
 - Markdown normalization into a stable rich text document format (`rtf-1`)

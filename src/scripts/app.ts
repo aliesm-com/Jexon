@@ -1,11 +1,13 @@
 import {
 	CONTENT_BUNDLE_VERSION,
 	FIELD_TYPES,
+	LIST_ITEM_FIELD_TYPES,
 	MODULE_SCHEMA_VERSION,
 	type ContentBundle,
 	type DraftEntry,
 	type FieldDefinition,
 	type FieldModule,
+	type ListItemFieldType,
 	type PublishOptions,
 } from '../lib/content-model';
 import { markdownToRichText } from '../lib/rich-text';
@@ -66,6 +68,7 @@ interface FieldPresetTemplate {
 	type: FieldDefinition['type'];
 	required?: boolean;
 	helpText?: string;
+	itemFields?: FieldDefinition[];
 }
 
 const FIELD_PRESET_TEMPLATES: ReadonlyArray<FieldPresetTemplate> = [
@@ -105,6 +108,18 @@ const FIELD_PRESET_TEMPLATES: ReadonlyArray<FieldPresetTemplate> = [
 	{ id: 'podcast', fieldId: 'cover_art', label: 'Cover Art', type: 'file' },
 	{ id: 'podcast', fieldId: 'duration_minutes', label: 'Duration (minutes)', type: 'number' },
 	{ id: 'podcast', fieldId: 'published_at', label: 'Published At', type: 'date' },
+	{
+		id: 'podcast',
+		fieldId: 'sources',
+		label: 'Sources',
+		type: 'list',
+		helpText: 'Add each source as a separate row',
+		itemFields: [
+			{ id: 'title', label: 'Title', type: 'text', required: true },
+			{ id: 'url', label: 'URL', type: 'url', required: true },
+			{ id: 'note', label: 'Note', type: 'text' },
+		],
+	},
 
 	{ id: 'landingPage', fieldId: 'headline', label: 'Headline', type: 'text', required: true },
 	{ id: 'landingPage', fieldId: 'subheadline', label: 'Subheadline', type: 'textarea' },
@@ -141,6 +156,13 @@ const fieldLabelInput = byId<HTMLInputElement>('field-label');
 const fieldTypeInput = byId<HTMLSelectElement>('field-type');
 const fieldHelpInput = byId<HTMLInputElement>('field-help');
 const fieldRequiredInput = byId<HTMLInputElement>('field-required');
+const listItemFieldsPanel = byId<HTMLDivElement>('list-item-fields-panel');
+const itemFieldIdInput = byId<HTMLInputElement>('item-field-id');
+const itemFieldLabelInput = byId<HTMLInputElement>('item-field-label');
+const itemFieldTypeInput = byId<HTMLSelectElement>('item-field-type');
+const itemFieldHelpInput = byId<HTMLInputElement>('item-field-help');
+const itemFieldRequiredInput = byId<HTMLInputElement>('item-field-required');
+const draftItemFieldList = byId<HTMLDivElement>('draft-item-field-list');
 const fieldPresetList = byId<HTMLDivElement>('field-preset-list');
 const draftFieldList = byId<HTMLDivElement>('draft-field-list');
 const moduleList = byId<HTMLDivElement>('module-list');
@@ -168,6 +190,7 @@ const settingsUploadAssetFiles = byId<HTMLInputElement>('settings-upload-asset-f
 let modules: FieldModule[] = [];
 let entries: DraftEntry[] = [];
 let draftFields: FieldDefinition[] = [];
+let draftItemFields: FieldDefinition[] = [];
 let editingModuleId: string | null = null;
 let currentWizardStep: 0 | 1 | 2 | 3 = 0;
 let currentStartMode: 'import' | 'scratch' = 'scratch';
@@ -493,6 +516,19 @@ type UIStrings = {
 		required: string;
 		addField: string;
 		clearFields: string;
+		listItemFieldsTitle: string;
+		listItemFieldsLead: string;
+		itemFieldId: string;
+		itemFieldLabel: string;
+		itemFieldType: string;
+		addItemField: string;
+		addListItem: string;
+		removeListItem: string;
+		listItemLabel: string;
+		noticeListNeedsItemFields: string;
+		noticeItemFieldExists: string;
+		noticeItemFieldAdded: string;
+		noticeItemFieldDeleted: string;
 		fieldTemplatesTitle: string;
 		templateBlogPost: string;
 		templateSeoPack: string;
@@ -610,6 +646,19 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		required: 'Required',
 		addField: 'Add Field',
 		clearFields: 'Clear Fields',
+		listItemFieldsTitle: 'Item fields',
+		listItemFieldsLead: 'Each row in this list uses these fields (title, url, …).',
+		itemFieldId: 'Item field ID',
+		itemFieldLabel: 'Item field label',
+		itemFieldType: 'Item field type',
+		addItemField: 'Add item field',
+		addListItem: 'Add item',
+		removeListItem: 'Remove',
+		listItemLabel: 'Item {index}',
+		noticeListNeedsItemFields: 'List fields need at least one item field.',
+		noticeItemFieldExists: "An item field with id '{id}' already exists.",
+		noticeItemFieldAdded: "Item field '{id}' added.",
+		noticeItemFieldDeleted: "Item field '{id}' removed.",
 		fieldTemplatesTitle: 'Quick field templates',
 		templateBlogPost: 'Blog Post',
 		templateSeoPack: 'SEO Pack',
@@ -1081,6 +1130,19 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		noticeFieldNeedsFile: 'فیلد "{label}" به فایل نیاز دارد.',
 		noticeCouldNotReadFile: 'خواندن فایل برای "{label}" ممکن نبود.',
 		noticeFieldRequired: 'فیلد "{label}" الزامی است.',
+		listItemFieldsTitle: 'فیلدهای هر ردیف',
+		listItemFieldsLead: 'هر منبع/ردیف از این فیلدها استفاده می‌کند (عنوان، لینک، …).',
+		itemFieldId: 'شناسه فیلد ردیف',
+		itemFieldLabel: 'برچسب فیلد ردیف',
+		itemFieldType: 'نوع فیلد ردیف',
+		addItemField: 'افزودن فیلد ردیف',
+		addListItem: 'افزودن ردیف',
+		removeListItem: 'حذف',
+		listItemLabel: 'ردیف {index}',
+		noticeListNeedsItemFields: 'فیلد لیست باید حداقل یک فیلد ردیف داشته باشد.',
+		noticeItemFieldExists: "فیلد ردیفی با شناسه '{id}' از قبل وجود دارد.",
+		noticeItemFieldAdded: "فیلد ردیف '{id}' اضافه شد.",
+		noticeItemFieldDeleted: "فیلد ردیف '{id}' حذف شد.",
 		noticeEntryAdded: "ورودی '{id}' اضافه شد.",
 		noticeCannotPublishNoModule: 'بدون حداقل یک ماژول نمی‌توان منتشر کرد.',
 		noticeBuildingFinalJson: 'در حال ساخت JSON نهایی...',
@@ -1113,6 +1175,7 @@ function init() {
 	initSidebarDrawer();
 	initI18n();
 	seedFieldTypeOptions();
+	seedListItemFieldTypeOptions();
 	loadState();
 	loadS3SettingsForm();
 	bindEvents();
@@ -1302,6 +1365,13 @@ function applyLanguage(lang: SupportedLang) {
 	setPlaceholder('#field-label', u.fieldLabelPlaceholder);
 	setPlaceholder('#field-help', u.fieldHelpPlaceholder);
 	setText('label[for="field-required"] span', u.required);
+	setText('#list-item-fields-title', u.listItemFieldsTitle);
+	setText('#list-item-fields-lead', u.listItemFieldsLead);
+	setText('label[for="item-field-id"] span', u.itemFieldId);
+	setText('label[for="item-field-label"] span', u.itemFieldLabel);
+	setText('label[for="item-field-type"] span', u.itemFieldType);
+	setText('label[for="item-field-required"] span', u.required);
+	setText('#add-item-field-btn', u.addItemField);
 	setText('#add-field-btn', u.addField);
 	setText('#clear-fields-btn', u.clearFields);
 	updateModuleFormUi();
@@ -1607,7 +1677,10 @@ function initWizard(): void {
 
 function bindEvents() {
 	byId<HTMLButtonElement>('add-field-btn').addEventListener('click', addFieldToDraft);
+	byId<HTMLButtonElement>('add-item-field-btn').addEventListener('click', addItemFieldToDraft);
 	byId<HTMLButtonElement>('clear-fields-btn').addEventListener('click', clearFieldDraft);
+	draftItemFieldList.addEventListener('click', handleDraftItemFieldActions);
+	fieldTypeInput.addEventListener('change', updateListItemFieldsPanelVisibility);
 	draftFieldList.addEventListener('click', handleDraftFieldActions);
 	draftFieldList.addEventListener('dragstart', handleDraftFieldDragStart);
 	draftFieldList.addEventListener('dragover', handleDraftFieldDragOver);
@@ -1641,6 +1714,7 @@ function bindEvents() {
 	moduleList.addEventListener('click', handleModuleActions);
 	entryList.addEventListener('click', handleEntryActions);
 	entryModuleSelect.addEventListener('change', refreshEntryFieldsIfActive);
+	entryFieldContainer.addEventListener('click', handleListFieldActions);
 	fieldLabelInput.addEventListener('blur', () => {
 		if (!fieldIdInput.value.trim()) {
 			fieldIdInput.value = toId(fieldLabelInput.value);
@@ -1664,6 +1738,503 @@ function seedFieldTypeOptions() {
 		option.textContent = type;
 		fieldTypeInput.append(option);
 	}
+	updateListItemFieldsPanelVisibility();
+}
+
+function seedListItemFieldTypeOptions() {
+	if (itemFieldTypeInput.options.length) {
+		return;
+	}
+
+	for (const type of LIST_ITEM_FIELD_TYPES) {
+		const option = document.createElement('option');
+		option.value = type;
+		option.textContent = type;
+		itemFieldTypeInput.append(option);
+	}
+}
+
+function isListItemFieldType(value: string): value is ListItemFieldType {
+	return LIST_ITEM_FIELD_TYPES.includes(value as ListItemFieldType);
+}
+
+function updateListItemFieldsPanelVisibility() {
+	listItemFieldsPanel.hidden = fieldTypeInput.value !== 'list';
+}
+
+function resetItemFieldDraftForm() {
+	itemFieldIdInput.value = '';
+	itemFieldLabelInput.value = '';
+	itemFieldHelpInput.value = '';
+	itemFieldRequiredInput.checked = false;
+}
+
+function renderDraftItemFields() {
+	const u = uiText();
+	if (!draftItemFields.length) {
+		draftItemFieldList.innerHTML = `<p class="muted">${escapeHtml(u.noFieldsAddedYet)}</p>`;
+		return;
+	}
+
+	draftItemFieldList.innerHTML = draftItemFields
+		.map(
+			(field, index) => `
+			<div class="chip chip--draft">
+				<div class="chip-row">
+					<strong>${escapeHtml(field.id)}</strong>
+					<div class="chip-actions">
+						<button type="button" class="chip-delete-btn" data-item-draft-action="delete" data-item-draft-index="${index}" aria-label="${escapeHtml(u.delete)}" title="${escapeHtml(u.delete)}">✕</button>
+					</div>
+				</div>
+				<span>${escapeHtml(field.label)}</span>
+				<small>${escapeHtml(field.type)}${field.required ? ` - ${escapeHtml(u.required.toLowerCase())}` : ''}</small>
+			</div>
+		`,
+		)
+		.join('');
+}
+
+function addItemFieldToDraft() {
+	const id = toId(itemFieldIdInput.value.trim() || itemFieldLabelInput.value.trim());
+	const label = itemFieldLabelInput.value.trim();
+	const type = itemFieldTypeInput.value;
+	const helpText = itemFieldHelpInput.value.trim();
+	const required = itemFieldRequiredInput.checked;
+
+	if (!id || !label) {
+		setNotice(tUi('noticeFieldIdLabelRequired'), 'error');
+		return;
+	}
+
+	if (!isListItemFieldType(type)) {
+		setNotice(tUi('noticeInvalidFieldType'), 'error');
+		return;
+	}
+
+	if (draftItemFields.some((field) => field.id === id)) {
+		setNotice(tUi('noticeItemFieldExists', { id }), 'error');
+		return;
+	}
+
+	draftItemFields.push({
+		id,
+		label,
+		type,
+		required,
+		helpText: helpText || undefined,
+	});
+
+	resetItemFieldDraftForm();
+	renderDraftItemFields();
+	setNotice(tUi('noticeItemFieldAdded', { id }), 'ok');
+}
+
+function handleDraftItemFieldActions(event: Event) {
+	const target = event.target as HTMLElement;
+	const button = target.closest<HTMLButtonElement>('button[data-item-draft-action]');
+	if (!button) {
+		return;
+	}
+
+	const action = button.dataset.itemDraftAction;
+	const rawIndex = button.dataset.itemDraftIndex;
+	const index = rawIndex ? Number(rawIndex) : NaN;
+	if (action !== 'delete' || Number.isNaN(index) || index < 0 || index >= draftItemFields.length) {
+		return;
+	}
+
+	const [removed] = draftItemFields.splice(index, 1);
+	renderDraftItemFields();
+	if (removed) {
+		setNotice(tUi('noticeItemFieldDeleted', { id: removed.id }), 'info');
+	}
+}
+
+function parseImportedFieldDefinition(maybeField: Record<string, unknown>, path: string): FieldDefinition {
+	const fieldId = toId(String(maybeField.id ?? ''));
+	const fieldLabel = String(maybeField.label ?? '').trim();
+	const fieldType = String(maybeField.type ?? '').trim();
+
+	if (!fieldId || !fieldLabel || !isFieldType(fieldType)) {
+		throw new Error(`Invalid field '${fieldId || '[missing]'}' at ${path}.`);
+	}
+
+	const field: FieldDefinition = {
+		id: fieldId,
+		label: fieldLabel,
+		type: fieldType,
+		required: Boolean(maybeField.required),
+		helpText: typeof maybeField.helpText === 'string' ? maybeField.helpText : undefined,
+	};
+
+	if (fieldType === 'list') {
+		const itemFieldsRaw = maybeField.itemFields;
+		if (!Array.isArray(itemFieldsRaw) || itemFieldsRaw.length === 0) {
+			throw new Error(`List field '${fieldId}' must include itemFields.`);
+		}
+		field.itemFields = itemFieldsRaw.map((itemField, index) => {
+			if (!itemField || typeof itemField !== 'object') {
+				throw new Error(`Invalid itemFields[${index}] on '${fieldId}'.`);
+			}
+			return parseImportedListItemField(itemField as Record<string, unknown>, `${path}.itemFields[${index}]`);
+		});
+	}
+
+	return field;
+}
+
+function parseImportedListItemField(maybeField: Record<string, unknown>, path: string): FieldDefinition {
+	const fieldId = toId(String(maybeField.id ?? ''));
+	const fieldLabel = String(maybeField.label ?? '').trim();
+	const fieldType = String(maybeField.type ?? '').trim();
+
+	if (!fieldId || !fieldLabel || !isListItemFieldType(fieldType)) {
+		throw new Error(`Invalid list item field '${fieldId || '[missing]'}' at ${path}.`);
+	}
+
+	return {
+		id: fieldId,
+		label: fieldLabel,
+		type: fieldType,
+		required: Boolean(maybeField.required),
+		helpText: typeof maybeField.helpText === 'string' ? maybeField.helpText : undefined,
+	};
+}
+
+function createListItemFieldInputMarkup(
+	itemField: FieldDefinition,
+	inputId: string,
+	requiredAttr: string,
+): string {
+	const help = itemField.helpText ? `<small>${escapeHtml(itemField.helpText)}</small>` : '';
+
+	if (itemField.type === 'textarea') {
+		return `
+			<label class="stack" for="${escapeHtml(inputId)}">
+				<span>${escapeHtml(itemField.label)} ${itemField.required ? '<em>*</em>' : ''}</span>
+				<textarea id="${escapeHtml(inputId)}" rows="3" ${requiredAttr}></textarea>
+				${help}
+			</label>
+		`;
+	}
+
+	if (itemField.type === 'boolean') {
+		return `
+			<label class="toggle" for="${escapeHtml(inputId)}">
+				<input id="${escapeHtml(inputId)}" type="checkbox" />
+				<span>${escapeHtml(itemField.label)}</span>
+			</label>
+		`;
+	}
+
+	const typeMap: Record<ListItemFieldType, string> = {
+		text: 'text',
+		textarea: 'text',
+		url: 'url',
+		number: 'number',
+		boolean: 'checkbox',
+		date: 'date',
+	};
+
+	return `
+		<label class="stack" for="${escapeHtml(inputId)}">
+			<span>${escapeHtml(itemField.label)} ${itemField.required ? '<em>*</em>' : ''}</span>
+			<input id="${escapeHtml(inputId)}" type="${typeMap[itemField.type]}" ${requiredAttr} />
+			${help}
+		</label>
+	`;
+}
+
+function createListFieldInputMarkup(field: FieldDefinition): string {
+	const u = uiText();
+	const help = field.helpText ? `<small>${escapeHtml(field.helpText)}</small>` : '';
+	const itemFields = field.itemFields ?? [];
+
+	return `
+		<div class="list-field" data-list-field="${escapeHtml(field.id)}">
+			<div class="list-field-head">
+				<span>${escapeHtml(field.label)} ${field.required ? '<em>*</em>' : ''}</span>
+				${help}
+			</div>
+			<div class="list-items" data-list-items="${escapeHtml(field.id)}"></div>
+			<button
+				type="button"
+				class="btn--outline"
+				data-list-action="add"
+				data-list-field="${escapeHtml(field.id)}"
+			>${escapeHtml(u.addListItem)}</button>
+		</div>
+	`;
+}
+
+function createListItemRowMarkup(field: FieldDefinition, itemFields: FieldDefinition[], index: number | string): string {
+	const u = uiText();
+	const label =
+		typeof index === 'number'
+			? tUi('listItemLabel', { index: index + 1 })
+			: tUi('listItemLabel', { index: '__LABEL__' });
+
+	return `
+		<div class="list-item" data-list-item="${typeof index === 'number' ? index : '__INDEX__'}">
+			<div class="list-item-bar">
+				<strong>${escapeHtml(label)}</strong>
+				<button
+					type="button"
+					class="btn--ghost"
+					data-list-action="remove"
+					data-list-field="${escapeHtml(field.id)}"
+				>${escapeHtml(u.removeListItem)}</button>
+			</div>
+			${itemFields
+				.map((itemField) => {
+					const inputId = `entry-field-${field.id}-${index}-${itemField.id}`;
+					const requiredAttr = itemField.required ? 'required' : '';
+					return createListItemFieldInputMarkup(itemField, inputId, requiredAttr);
+				})
+				.join('')}
+		</div>
+	`;
+}
+
+function handleListFieldActions(event: Event) {
+	const target = event.target as HTMLElement;
+	const button = target.closest<HTMLButtonElement>('button[data-list-action]');
+	if (!button) {
+		return;
+	}
+
+	const action = button.dataset.listAction;
+	const fieldId = button.dataset.listField;
+	if (!action || !fieldId) {
+		return;
+	}
+
+	const module = getSelectedModule();
+	const field = module?.fields.find((item) => item.id === fieldId && item.type === 'list');
+	if (!field?.itemFields?.length) {
+		return;
+	}
+
+	const itemsContainer = entryFieldContainer.querySelector(`[data-list-items="${fieldId}"]`);
+	if (!itemsContainer) {
+		return;
+	}
+
+	if (action === 'add') {
+		const nextIndex = itemsContainer.querySelectorAll('[data-list-item]').length;
+		const html = createListItemRowMarkup(field, field.itemFields, nextIndex);
+		itemsContainer.insertAdjacentHTML('beforeend', html);
+		return;
+	}
+
+	if (action === 'remove') {
+		const item = button.closest('[data-list-item]');
+		item?.remove();
+		reindexListFieldItems(fieldId);
+	}
+}
+
+function reindexListFieldItems(fieldId: string) {
+	const module = getSelectedModule();
+	const field = module?.fields.find((item) => item.id === fieldId && item.type === 'list');
+	if (!field?.itemFields?.length) {
+		return;
+	}
+
+	const itemsContainer = entryFieldContainer.querySelector(`[data-list-items="${fieldId}"]`);
+	if (!itemsContainer) {
+		return;
+	}
+
+	const rows = Array.from(itemsContainer.querySelectorAll('[data-list-item]'));
+	rows.forEach((row, index) => {
+		row.setAttribute('data-list-item', String(index));
+		const label = row.querySelector('.list-item-bar strong');
+		if (label) {
+			label.textContent = tUi('listItemLabel', { index: index + 1 });
+		}
+
+		for (const itemField of field.itemFields ?? []) {
+			const oldId = row.querySelector(`[id^="entry-field-${fieldId}-"][id$="-${itemField.id}"]`)?.id;
+			const input = oldId ? (document.getElementById(oldId) as HTMLInputElement | HTMLTextAreaElement | null) : null;
+			const nextId = `entry-field-${fieldId}-${index}-${itemField.id}`;
+			if (input) {
+				input.id = nextId;
+				const labelEl = row.querySelector(`label[for="${oldId}"]`) as HTMLLabelElement | null;
+				if (labelEl) {
+					labelEl.setAttribute('for', nextId);
+				}
+			}
+		}
+	});
+}
+
+async function collectListFieldValue(field: FieldDefinition): Promise<unknown[] | null> {
+	const itemFields = field.itemFields ?? [];
+	const itemsContainer = entryFieldContainer.querySelector(`[data-list-items="${field.id}"]`);
+	const rows = itemsContainer ? Array.from(itemsContainer.querySelectorAll('[data-list-item]')) : [];
+	const values: Record<string, unknown>[] = [];
+
+	for (let index = 0; index < rows.length; index += 1) {
+		const row: Record<string, unknown> = {};
+		let hasContent = false;
+
+		for (const itemField of itemFields) {
+			const inputId = `entry-field-${field.id}-${index}-${itemField.id}`;
+			const input = document.getElementById(inputId) as HTMLInputElement | HTMLTextAreaElement | null;
+			if (!input) {
+				continue;
+			}
+
+			let value: unknown;
+			if (itemField.type === 'boolean') {
+				value = (input as HTMLInputElement).checked;
+				if (value) hasContent = true;
+			} else if (itemField.type === 'number') {
+				const raw = input.value.trim();
+				value = raw === '' ? null : Number(raw);
+				if (raw !== '') hasContent = true;
+			} else {
+				value = input.value.trim();
+				if (typeof value === 'string' && value) hasContent = true;
+			}
+
+			if (itemField.required) {
+				const missing =
+					itemField.type === 'boolean'
+						? false
+						: value === null || value === undefined || value === '';
+				if (missing) {
+					setNotice(tUi('noticeFieldRequired', { label: `${field.label} · ${itemField.label}` }), 'error');
+					throw new Error('missing-required-list-item-field');
+				}
+			}
+
+			row[itemField.id] = value;
+		}
+
+		if (hasContent) {
+			values.push(row);
+		}
+	}
+
+	if (field.required && values.length === 0) {
+		setNotice(tUi('noticeFieldRequired', { label: field.label }), 'error');
+		throw new Error('missing-required-list-field');
+	}
+
+	return values.length ? values : null;
+}
+
+async function normalizeListItemFieldForLocalPublish(
+	itemField: FieldDefinition,
+	rawValue: unknown,
+	entryId: string,
+	listFieldId: string,
+	itemIndex: number,
+): Promise<unknown> {
+	const path = `${entryId}.${listFieldId}[${itemIndex}].${itemField.id}`;
+	if (isMissingForLocalPublish(rawValue)) {
+		if (itemField.required) {
+			throw new Error(`Entry '${entryId}' list '${listFieldId}' item ${itemIndex + 1} is missing '${itemField.id}'`);
+		}
+		return null;
+	}
+
+	switch (itemField.type) {
+		case 'text':
+		case 'textarea': {
+			if (typeof rawValue !== 'string') {
+				throw new Error(`Field '${path}' must be a string`);
+			}
+			return rawValue.trim();
+		}
+		case 'url': {
+			if (typeof rawValue !== 'string') {
+				throw new Error(`Field '${path}' must be a URL string`);
+			}
+			const trimmed = rawValue.trim();
+			try {
+				return new URL(trimmed).toString();
+			} catch {
+				throw new Error(`Field '${path}' must be a valid absolute URL`);
+			}
+		}
+		case 'number': {
+			const value = typeof rawValue === 'number' ? rawValue : Number(rawValue);
+			if (!Number.isFinite(value)) {
+				throw new Error(`Field '${path}' must be a valid number`);
+			}
+			return value;
+		}
+		case 'boolean': {
+			if (typeof rawValue === 'boolean') return rawValue;
+			if (rawValue === 'true') return true;
+			if (rawValue === 'false') return false;
+			throw new Error(`Field '${path}' must be boolean`);
+		}
+		case 'date': {
+			if (typeof rawValue !== 'string') {
+				throw new Error(`Field '${path}' must be a date string`);
+			}
+			const parsed = new Date(rawValue.trim());
+			if (Number.isNaN(parsed.getTime())) {
+				throw new Error(`Field '${path}' must be a valid date`);
+			}
+			return parsed.toISOString().slice(0, 10);
+		}
+		default: {
+			const neverType: never = itemField.type as never;
+			throw new Error(`Unsupported list item field type '${String(neverType)}'`);
+		}
+	}
+}
+
+async function normalizeListFieldForLocalPublish(
+	field: FieldDefinition,
+	rawValue: unknown,
+	entryId: string,
+): Promise<unknown> {
+	const itemFields = field.itemFields ?? [];
+	if (!Array.isArray(rawValue)) {
+		if (isMissingForLocalPublish(rawValue)) {
+			if (field.required) {
+				throw new Error(`Entry '${entryId}' is missing required field '${field.id}'`);
+			}
+			return null;
+		}
+		throw new Error(`Field '${field.id}' must be an array`);
+	}
+
+	const normalized: Record<string, unknown>[] = [];
+	for (let index = 0; index < rawValue.length; index += 1) {
+		const item = rawValue[index];
+		if (!item || typeof item !== 'object') {
+			throw new Error(`Field '${field.id}' item ${index + 1} must be an object`);
+		}
+		const row: Record<string, unknown> = {};
+		for (const itemField of itemFields) {
+			const value = await normalizeListItemFieldForLocalPublish(
+				itemField,
+				(item as Record<string, unknown>)[itemField.id],
+				entryId,
+				field.id,
+				index,
+			);
+			if (value !== null && value !== undefined && value !== '') {
+				row[itemField.id] = value;
+			}
+		}
+		if (Object.keys(row).length > 0) {
+			normalized.push(row);
+		}
+	}
+
+	if (field.required && normalized.length === 0) {
+		throw new Error(`Entry '${entryId}' is missing required field '${field.id}'`);
+	}
+
+	return normalized.length ? normalized : null;
 }
 
 function loadState() {
@@ -1787,24 +2358,42 @@ function addFieldToDraft() {
 		return;
 	}
 
-	draftFields.push({
+	if (type === 'list' && draftItemFields.length === 0) {
+		setNotice(tUi('noticeListNeedsItemFields'), 'error');
+		return;
+	}
+
+	const nextField: FieldDefinition = {
 		id,
 		label,
 		type,
 		required,
 		helpText: helpText || undefined,
-	});
+	};
+
+	if (type === 'list') {
+		nextField.itemFields = [...draftItemFields];
+		draftItemFields = [];
+		resetItemFieldDraftForm();
+		renderDraftItemFields();
+	}
+
+	draftFields.push(nextField);
 
 	fieldIdInput.value = '';
 	fieldLabelInput.value = '';
 	fieldHelpInput.value = '';
 	fieldRequiredInput.checked = false;
+	updateListItemFieldsPanelVisibility();
 	renderDraftFields();
 	setNotice(tUi('noticeFieldAdded', { id }), 'ok');
 }
 
 function clearFieldDraft() {
 	draftFields = [];
+	draftItemFields = [];
+	resetItemFieldDraftForm();
+	renderDraftItemFields();
 	renderDraftFields();
 	setNotice(tUi('noticeFieldListCleared'), 'info');
 }
@@ -1947,6 +2536,7 @@ function applyFieldPreset(presetId: FieldPresetId) {
 			type: preset.type,
 			required: Boolean(preset.required),
 			helpText: preset.helpText,
+			itemFields: preset.itemFields ? preset.itemFields.map((itemField) => ({ ...itemField })) : undefined,
 		});
 		addedCount += 1;
 	}
@@ -2047,6 +2637,9 @@ function resetModuleForm() {
 	moduleNameInput.value = '';
 	moduleDescriptionInput.value = '';
 	draftFields = [];
+	draftItemFields = [];
+	resetItemFieldDraftForm();
+	renderDraftItemFields();
 	renderDraftFields();
 	updateModuleFormUi();
 }
@@ -2170,26 +2763,11 @@ function parseImportedModule(value: unknown): FieldModule {
 		throw new Error('Imported module is missing required fields (id, name, fields).');
 	}
 
-	const fields: FieldDefinition[] = fieldsRaw.map((field) => {
+	const fields: FieldDefinition[] = fieldsRaw.map((field, index) => {
 		if (!field || typeof field !== 'object') {
 			throw new Error('Invalid imported field structure.');
 		}
-		const maybeField = field as Record<string, unknown>;
-		const fieldId = toId(String(maybeField.id ?? ''));
-		const fieldLabel = String(maybeField.label ?? '').trim();
-		const fieldType = String(maybeField.type ?? '').trim();
-
-		if (!fieldId || !fieldLabel || !isFieldType(fieldType)) {
-			throw new Error(`Invalid field '${fieldId || '[missing]'}'.`);
-		}
-
-		return {
-			id: fieldId,
-			label: fieldLabel,
-			type: fieldType,
-			required: Boolean(maybeField.required),
-			helpText: typeof maybeField.helpText === 'string' ? maybeField.helpText : undefined,
-		};
+		return parseImportedFieldDefinition(field as Record<string, unknown>, `fields[${index}]`);
 	});
 
 	return {
@@ -2322,6 +2900,15 @@ async function addEntry() {
 				return;
 			}
 			values[field.id] = store.value;
+			continue;
+		}
+
+		if (field.type === 'list') {
+			try {
+				values[field.id] = await collectListFieldValue(field);
+			} catch {
+				return;
+			}
 			continue;
 		}
 
@@ -2615,6 +3202,9 @@ async function normalizeFieldValueForLocalPublish(
 		case 'file': {
 			return normalizeFileFieldForLocalPublish(field, rawValue, entryId, options);
 		}
+		case 'list': {
+			return normalizeListFieldForLocalPublish(field, rawValue, entryId);
+		}
 		default: {
 			const neverType: never = field.type as never;
 			throw new Error(`Unsupported field type for '${String(neverType)}'`);
@@ -2707,6 +3297,7 @@ function readString(value: unknown): string | undefined {
 
 function isMissingForLocalPublish(value: unknown): boolean {
 	if (value === null || value === undefined) return true;
+	if (Array.isArray(value)) return value.length === 0;
 	if (typeof value === 'string') return value.trim().length === 0;
 	return false;
 }
@@ -2780,7 +3371,11 @@ function renderDraftFields() {
 					</div>
 				</div>
 				<span>${escapeHtml(field.label)}</span>
-				<small>${escapeHtml(field.type)}${field.required ? ` - ${escapeHtml(u.required.toLowerCase())}` : ''}</small>
+				<small>${escapeHtml(field.type)}${
+					field.type === 'list' && field.itemFields?.length
+						? ` · ${field.itemFields.length} sub-field(s)`
+						: ''
+				}${field.required ? ` - ${escapeHtml(u.required.toLowerCase())}` : ''}</small>
 			</div>
 		`,
 		)
@@ -2922,6 +3517,10 @@ function createFieldInputMarkup(field: FieldDefinition): string {
 	const requiredAttr = field.required ? 'required' : '';
 	const help = field.helpText ? `<small>${escapeHtml(field.helpText)}</small>` : '';
 
+	if (field.type === 'list') {
+		return createListFieldInputMarkup(field);
+	}
+
 	if (field.type === 'file') {
 		return `
 			<label class="stack" for="${escapeHtml(id)}">
@@ -2988,6 +3587,7 @@ function createFieldInputMarkup(field: FieldDefinition): string {
 		date: 'date',
 		richText: 'text',
 		file: 'file',
+		list: 'text',
 	};
 
 	return `

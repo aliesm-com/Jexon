@@ -225,6 +225,38 @@ const withBase = (path: string) => new URL(path.replace(/^\//, ''), `https://loc
 										<input id="field-required" type="checkbox" />
 										<span>Required</span>
 									</label>
+									<div id="list-item-fields-panel" class="list-item-fields-panel" hidden>
+										<h4 id="list-item-fields-title">Item fields</h4>
+										<p class="muted" id="list-item-fields-lead">Each row in this list uses these fields (title, url, …).</p>
+										<div class="cols-2">
+											<label class="stack" for="item-field-id">
+												<span>Item field ID</span>
+												<input id="item-field-id" placeholder="title" />
+											</label>
+											<label class="stack" for="item-field-label">
+												<span>Item field label</span>
+												<input id="item-field-label" placeholder="Title" />
+											</label>
+										</div>
+										<div class="cols-2">
+											<label class="stack" for="item-field-type">
+												<span>Item field type</span>
+												<select id="item-field-type"></select>
+											</label>
+											<label class="stack" for="item-field-help">
+												<span>Help text (optional)</span>
+												<input id="item-field-help" placeholder="Displayed below the field" />
+											</label>
+										</div>
+										<label class="toggle" for="item-field-required">
+											<input id="item-field-required" type="checkbox" />
+											<span>Required</span>
+										</label>
+										<div class="row">
+											<button id="add-item-field-btn" type="button" class="btn--outline">Add item field</button>
+										</div>
+										<div id="draft-item-field-list" class="chip-list"></div>
+									</div>
 									<div class="row">
 										<button id="add-field-btn" type="button">Add Field</button>
 										<button id="clear-fields-btn" type="button" class="btn--ghost">Clear Fields</button>

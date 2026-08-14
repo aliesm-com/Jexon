@@ -1,19 +1,48 @@
 import { z } from 'zod';
 
-import { FIELD_TYPES, MODULE_SCHEMA_VERSION } from './content-model';
+import { FIELD_TYPES, LIST_ITEM_FIELD_TYPES, MODULE_SCHEMA_VERSION } from './content-model';
 
 const fieldTypeSchema = z.enum(FIELD_TYPES);
+const listItemFieldTypeSchema = z.enum(LIST_ITEM_FIELD_TYPES);
 
-export const fieldDefinitionSchema = z.object({
-	id: z
-		.string()
-		.min(2, 'field.id must be at least 2 characters')
-		.regex(/^[a-zA-Z0-9_-]+$/, 'field.id can only include letters, numbers, _ and -'),
+const fieldIdSchema = z
+	.string()
+	.min(2, 'field.id must be at least 2 characters')
+	.regex(/^[a-zA-Z0-9_-]+$/, 'field.id can only include letters, numbers, _ and -');
+
+const listItemFieldSchema = z.object({
+	id: fieldIdSchema,
 	label: z.string().min(1, 'field.label is required'),
-	type: fieldTypeSchema,
+	type: listItemFieldTypeSchema,
 	required: z.boolean().optional().default(false),
 	helpText: z.string().max(220).optional(),
 });
+
+export const fieldDefinitionSchema = z
+	.object({
+		id: fieldIdSchema,
+		label: z.string().min(1, 'field.label is required'),
+		type: fieldTypeSchema,
+		required: z.boolean().optional().default(false),
+		helpText: z.string().max(220).optional(),
+		itemFields: z.array(listItemFieldSchema).optional(),
+	})
+	.superRefine((field, ctx) => {
+		if (field.type === 'list' && (!field.itemFields || field.itemFields.length === 0)) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: `list field '${field.id}' requires at least one itemFields entry`,
+				path: ['itemFields'],
+			});
+		}
+		if (field.type !== 'list' && field.itemFields) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: `only list fields can include itemFields`,
+				path: ['itemFields'],
+			});
+		}
+	});
 
 export const fieldModuleSchema = z.object({
 	schemaVersion: z.literal(MODULE_SCHEMA_VERSION),

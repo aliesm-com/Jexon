@@ -2498,3 +2498,66 @@ html[dir='rtl'] #language-select option {
 #section-publish .wizard-nav {
 	margin-top: var(--space-6);
 }
+
+.list-item-fields-panel {
+	margin: 0 0 var(--space-5);
+	padding: 0.9rem 1rem;
+	border: 1px dashed color-mix(in srgb, var(--accent) 45%, var(--border));
+	border-radius: 12px;
+	background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.list-item-fields-panel h4 {
+	margin: 0 0 0.35rem;
+	font-size: 0.95rem;
+}
+
+.list-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.7rem;
+	margin-bottom: var(--space-5);
+}
+
+.list-field-head {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+}
+
+.list-field-head span {
+	font-weight: 700;
+}
+
+.list-items {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.list-item {
+	padding: 0.85rem 0.95rem;
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	background: var(--bg-elevated, var(--bg));
+}
+
+.list-item-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin-bottom: 0.7rem;
+}
+
+.list-item-bar strong {
+	font-size: 0.88rem;
+}
+
+.list-item .stack {
+	margin-bottom: 0.75rem;
+}
+
+.list-item .stack:last-child {
+	margin-bottom: 0;
+}

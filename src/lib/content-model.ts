@@ -11,9 +11,20 @@ export const FIELD_TYPES = [
 	'date',
 	'richText',
 	'file',
+	'list',
+] as const;
+
+export const LIST_ITEM_FIELD_TYPES = [
+	'text',
+	'textarea',
+	'url',
+	'number',
+	'boolean',
+	'date',
 ] as const;
 
 export type FieldType = (typeof FIELD_TYPES)[number];
+export type ListItemFieldType = (typeof LIST_ITEM_FIELD_TYPES)[number];
 
 export interface FieldDefinition {
 	id: string;
@@ -21,6 +32,8 @@ export interface FieldDefinition {
 	type: FieldType;
 	required?: boolean;
 	helpText?: string;
+	/** Nested fields when `type` is `list`. One object per row. */
+	itemFields?: FieldDefinition[];
 }
 
 export interface FieldModule {
