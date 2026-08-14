@@ -1472,6 +1472,19 @@ code {
 	box-shadow: var(--shadow-sm);
 }
 
+.s3-settings-panel {
+	margin: var(--space-2) 0 var(--space-5);
+	padding: var(--space-5);
+	border: 1px solid var(--border);
+	border-radius: 0.9rem;
+	background: color-mix(in srgb, var(--surface) 96%, var(--surface-2));
+	box-shadow: var(--shadow-sm);
+}
+
+#module-import-file {
+	max-width: 100%;
+}
+
 @media (max-width: 740px) {
 	.wizard-stepper__label {
 		display: none;
@@ -1845,6 +1858,8 @@ textarea {
 .chip {
 	padding: 0.78rem 0.9rem;
 	border-radius: 12px;
+	overflow: hidden;
+	min-width: 0;
 }
 
 .chip--draft {
@@ -1868,15 +1883,26 @@ textarea {
 
 .chip-row {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	justify-content: space-between;
 	gap: 0.55rem;
+	min-width: 0;
+	flex-wrap: wrap;
 }
 
 .chip-actions {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.28rem;
+	margin-inline-start: auto;
+	flex-shrink: 0;
+}
+
+.chip-row strong {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .chip-delete-btn {
@@ -1916,6 +1942,13 @@ textarea {
 .chip-move-btn:disabled {
 	opacity: 0.45;
 	cursor: not-allowed;
+}
+
+@media (max-width: 560px) {
+	.chip-actions {
+		width: 100%;
+		justify-content: flex-end;
+	}
 }
 
 .card {

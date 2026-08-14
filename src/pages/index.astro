@@ -169,7 +169,11 @@ const withBase = (path: string) => new URL(path.replace(/^\//, ''), `https://loc
 
 								<div id="mode-import-panel" class="mode-panel" hidden>
 									<h3>Import Workspace / Module</h3>
-									<p class="muted">Only import/export JSON here. S3 settings are configured in New mode.</p>
+									<p class="muted" id="import-panel-lead">Paste or upload one JSON file. You can also enter or update S3 settings below.</p>
+									<label class="stack" for="module-import-file">
+										<span>Upload JSON file</span>
+										<input id="module-import-file" type="file" accept=".json,application/json" />
+									</label>
 									<label class="stack" for="module-import">
 										<span>Paste JSON</span>
 										<textarea id="module-import" rows="8" placeholder='module-1, jexon-export-1 (module + S3), or jexon-workspace-1 (all modules + S3)'></textarea>
@@ -232,9 +236,11 @@ const withBase = (path: string) => new URL(path.replace(/^\//, ''), `https://loc
 										<button id="reset-module-btn" type="button" class="btn--ghost">Reset Form</button>
 										<button id="export-workspace-btn-scratch" type="button" class="btn--outline">Export workspace (modules + S3)</button>
 									</div>
+								</div>
 
+								<div id="s3-settings-panel" class="s3-settings-panel">
 									<h3>S3 Settings</h3>
-									<p class="muted">Used for asset uploads and publish. These values are also embedded in exports.</p>
+									<p class="muted" id="s3-settings-lead">Used for asset uploads and publish. These values are also embedded in exports. You can enter or update them in Import or New mode.</p>
 									<details class="import-details" id="import-details-block">
 										<summary>S3 credentials</summary>
 										<div class="details-inner">

@@ -146,6 +146,7 @@ const draftFieldList = byId<HTMLDivElement>('draft-field-list');
 const moduleList = byId<HTMLDivElement>('module-list');
 const moduleSortSelect = byId<HTMLSelectElement>('module-sort-select');
 const moduleImportInput = byId<HTMLTextAreaElement>('module-import');
+const moduleImportFile = byId<HTMLInputElement>('module-import-file');
 const entryModuleSelect = byId<HTMLSelectElement>('entry-module-select');
 const entryTitleInput = byId<HTMLInputElement>('entry-title');
 const entryFieldContainer = byId<HTMLDivElement>('entry-field-container');
@@ -198,6 +199,7 @@ const I18N_TEXT: Record<
 		importPanelTitle: string;
 		importPanelLead: string;
 		pasteJson: string;
+		uploadJsonFile: string;
 		importButton: string;
 		exportButton: string;
 		scratchPanelTitle: string;
@@ -245,8 +247,9 @@ const I18N_TEXT: Record<
 		modeImport: 'Import mode',
 		modeScratch: 'New mode',
 		importPanelTitle: 'Import Workspace / Module',
-		importPanelLead: 'Only import/export JSON here. S3 settings are configured in New mode.',
+		importPanelLead: 'Paste or upload one JSON file. You can also enter or update S3 settings below.',
 		pasteJson: 'Paste JSON',
+		uploadJsonFile: 'Upload JSON file',
 		importButton: 'Import from JSON',
 		exportButton: 'Export workspace (modules + S3)',
 		scratchPanelTitle: 'Create New Module',
@@ -293,8 +296,9 @@ const I18N_TEXT: Record<
 		modeImport: 'Mode import',
 		modeScratch: 'Mode nouveau',
 		importPanelTitle: 'Importer espace / module',
-		importPanelLead: "Import/export JSON ici. Les parametres S3 sont dans le mode Nouveau.",
+		importPanelLead: "Importez ou televersez un fichier JSON. Vous pouvez aussi saisir ou mettre a jour les parametres S3 ci-dessous.",
 		pasteJson: 'Coller JSON',
+		uploadJsonFile: 'Televerser un fichier JSON',
 		importButton: 'Importer JSON',
 		exportButton: 'Exporter workspace (modules + S3)',
 		scratchPanelTitle: 'Creer un nouveau module',
@@ -341,8 +345,9 @@ const I18N_TEXT: Record<
 		modeImport: 'Modo importar',
 		modeScratch: 'Modo nuevo',
 		importPanelTitle: 'Importar workspace / modulo',
-		importPanelLead: 'Aqui solo JSON import/export. S3 se configura en modo Nuevo.',
+		importPanelLead: 'Pega o sube un archivo JSON. Tambien puedes ingresar o actualizar la configuracion S3 abajo.',
 		pasteJson: 'Pegar JSON',
+		uploadJsonFile: 'Subir archivo JSON',
 		importButton: 'Importar JSON',
 		exportButton: 'Exportar workspace (modulos + S3)',
 		scratchPanelTitle: 'Crear nuevo modulo',
@@ -389,8 +394,9 @@ const I18N_TEXT: Record<
 		modeImport: 'وضع الاستيراد',
 		modeScratch: 'وضع جديد',
 		importPanelTitle: 'استيراد مساحة العمل / وحدة',
-		importPanelLead: 'هنا للاستيراد/التصدير بصيغة JSON فقط. إعدادات S3 في وضع جديد.',
+		importPanelLead: 'الصق أو حمّل ملف JSON واحد. يمكنك أيضًا إدخال إعدادات S3 أو تحديثها أدناه.',
 		pasteJson: 'لصق JSON',
+		uploadJsonFile: 'تحميل ملف JSON',
 		importButton: 'استيراد من JSON',
 		exportButton: 'تصدير مساحة العمل (modules + S3)',
 		scratchPanelTitle: 'إنشاء وحدة جديدة',
@@ -437,8 +443,9 @@ const I18N_TEXT: Record<
 		modeImport: 'حالت درون‌ریزی',
 		modeScratch: 'حالت جدید',
 		importPanelTitle: 'درون‌ریزی فضای کار / ماژول',
-		importPanelLead: 'اینجا فقط برای درون‌ریزی/برون‌بری JSON است. تنظیمات S3 در حالت جدید انجام می‌شود.',
+		importPanelLead: 'JSON را paste کنید یا یک فایل JSON آپلود کنید. تنظیمات S3 را هم می‌توانید در پایین وارد یا به‌روز کنید.',
 		pasteJson: 'الصاق JSON',
+		uploadJsonFile: 'آپلود فایل JSON',
 		importButton: 'درون‌ریزی از JSON',
 		exportButton: 'برون‌بری فضای کار (ماژول‌ها + S3)',
 		scratchPanelTitle: 'ایجاد ماژول جدید',
@@ -503,6 +510,7 @@ type UIStrings = {
 		sortTitleAsc: string;
 		sortTitleDesc: string;
 		saveModule: string;
+		updateModule: string;
 		resetForm: string;
 		s3UsedLead: string;
 		s3Credentials: string;
@@ -557,6 +565,7 @@ type UIStrings = {
 		noticeModuleExists: string;
 		noticeModuleSaved: string;
 		noticePasteJsonFirst: string;
+		noticeJsonFileLoaded: string;
 		noticeImportedWorkspace: string;
 		noticeImportedModule: string;
 		noticeImportedModules: string;
@@ -618,8 +627,10 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		sortTitleAsc: 'Title A-Z',
 		sortTitleDesc: 'Title Z-A',
 		saveModule: 'Save Module',
+		updateModule: 'Update Module',
 		resetForm: 'Reset Form',
-		s3UsedLead: 'Used for asset uploads and publish. These values are also embedded in exports.',
+		s3UsedLead:
+			'Used for asset uploads and publish. These values are also embedded in exports. You can enter or update them in Import or New mode.',
 		s3Credentials: 'S3 credentials',
 		bucket: 'Bucket',
 		region: 'Region',
@@ -672,6 +683,7 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		noticeModuleExists: "Module '{id}' already exists.",
 		noticeModuleSaved: "Module '{id}' saved.",
 		noticePasteJsonFirst: 'Paste JSON first.',
+		noticeJsonFileLoaded: "Loaded '{name}' into the import box.",
 		noticeImportedWorkspace: 'Imported workspace: {count} module(s).',
 		noticeImportedModule: "Imported module '{id}' (and S3 if present).",
 		noticeImportedModules: '{count} module(s) imported.',
@@ -715,8 +727,10 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		addField: 'Ajouter champ',
 		clearFields: 'Effacer champs',
 		saveModule: 'Enregistrer module',
+		updateModule: 'Mettre a jour module',
 		resetForm: 'Reinitialiser',
-		s3UsedLead: "Utilise pour l'upload des assets et la publication. Ces valeurs sont aussi exportees.",
+		s3UsedLead:
+			"Utilise pour l'upload des assets et la publication. Ces valeurs sont aussi exportees. Vous pouvez les saisir ou mettre a jour en mode Import ou Nouveau.",
 		s3Credentials: 'Identifiants S3',
 		bucket: 'Bucket',
 		region: 'Region',
@@ -766,6 +780,7 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		noticeModuleExists: "Le module '{id}' existe deja.",
 		noticeModuleSaved: "Module '{id}' enregistre.",
 		noticePasteJsonFirst: "Collez d'abord le JSON.",
+		noticeJsonFileLoaded: "Fichier '{name}' charge dans la zone d'import.",
 		noticeImportedWorkspace: 'Workspace importe : {count} module(s).',
 		noticeImportedModule: "Module '{id}' importe (et S3 si present).",
 		noticeImportedModules: '{count} module(s) importes.',
@@ -792,7 +807,6 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 	},
 	es: {
 		moduleImportPlaceholder: 'module-1, jexon-export-1 (modulo + S3), o jexon-workspace-1 (todos los modulos + S3)',
-		s3UsedLead: 'Se usa para subida de archivos y publicacion. Estos valores tambien se incluyen en exportaciones.',
 		moduleId: 'ID del modulo',
 		moduleName: 'Nombre del modulo',
 		description: 'Descripcion',
@@ -810,7 +824,10 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		addField: 'Agregar campo',
 		clearFields: 'Limpiar campos',
 		saveModule: 'Guardar modulo',
+		updateModule: 'Actualizar modulo',
 		resetForm: 'Restablecer',
+		s3UsedLead:
+			'Se usa para subida de archivos y publicacion. Estos valores tambien se incluyen en exportaciones. Puedes ingresarlos o actualizarlos en modo Importar o Nuevo.',
 		s3Credentials: 'Credenciales S3',
 		bucket: 'Bucket',
 		region: 'Region',
@@ -860,6 +877,7 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		noticeModuleExists: "El modulo '{id}' ya existe.",
 		noticeModuleSaved: "Modulo '{id}' guardado.",
 		noticePasteJsonFirst: 'Primero pega JSON.',
+		noticeJsonFileLoaded: "Archivo '{name}' cargado en el cuadro de importacion.",
 		noticeImportedWorkspace: 'Workspace importado: {count} modulo(s).',
 		noticeImportedModule: "Modulo '{id}' importado (y S3 si existe).",
 		noticeImportedModules: '{count} modulo(s) importado(s).',
@@ -880,7 +898,6 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 	},
 	ar: {
 		moduleImportPlaceholder: 'module-1 أو jexon-export-1 (module + S3) أو jexon-workspace-1 (كل الوحدات + S3)',
-		s3UsedLead: 'تستخدم هذه القيم لرفع الملفات والنشر، كما يتم تضمينها في التصدير.',
 		moduleId: 'معرف الوحدة',
 		moduleName: 'اسم الوحدة',
 		description: 'الوصف',
@@ -898,7 +915,10 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		addField: 'إضافة حقل',
 		clearFields: 'مسح الحقول',
 		saveModule: 'حفظ الوحدة',
+		updateModule: 'تحديث الوحدة',
 		resetForm: 'إعادة تعيين',
+		s3UsedLead:
+			'تُستخدم هذه القيم لرفع الملفات والنشر، كما يتم تضمينها في التصدير. يمكنك إدخالها أو تحديثها في وضع الاستيراد أو الجديد.',
 		s3Credentials: 'بيانات S3',
 		bucket: 'الحاوية',
 		region: 'المنطقة',
@@ -948,6 +968,7 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		noticeModuleExists: "الوحدة '{id}' موجودة بالفعل.",
 		noticeModuleSaved: "تم حفظ الوحدة '{id}'.",
 		noticePasteJsonFirst: 'ألصق JSON أولاً.',
+		noticeJsonFileLoaded: "تم تحميل '{name}' في صندوق الاستيراد.",
 		noticeImportedWorkspace: 'تم استيراد مساحة العمل: {count} وحدة.',
 		noticeImportedModule: "تم استيراد الوحدة '{id}' (وملفات S3 إن وجدت).",
 		noticeImportedModules: 'تم استيراد {count} وحدة.',
@@ -974,7 +995,6 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 	},
 	fa: {
 		moduleImportPlaceholder: 'module-1 یا jexon-export-1 (module + S3) یا jexon-workspace-1 (همه ماژول‌ها + S3)',
-		s3UsedLead: 'این مقادیر برای آپلود فایل و انتشار استفاده می‌شوند و در خروجی هم ذخیره می‌شوند.',
 		moduleId: 'شناسه ماژول',
 		moduleName: 'نام ماژول',
 		description: 'توضیحات',
@@ -992,7 +1012,10 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		addField: 'افزودن فیلد',
 		clearFields: 'پاک کردن فیلدها',
 		saveModule: 'ذخیره ماژول',
+		updateModule: 'به‌روزرسانی ماژول',
 		resetForm: 'بازنشانی فرم',
+		s3UsedLead:
+			'این مقادیر برای آپلود فایل و انتشار استفاده می‌شوند و در خروجی هم ذخیره می‌شوند. در هر دو حالت درون‌ریزی و جدید می‌توانید وارد یا به‌روز کنید.',
 		s3Credentials: 'اعتبارنامه‌های S3',
 		bucket: 'باکت',
 		region: 'ریجن',
@@ -1042,6 +1065,7 @@ const UI_TEXT: Record<SupportedLang, Partial<UIStrings>> = {
 		noticeModuleExists: "ماژول '{id}' از قبل وجود دارد.",
 		noticeModuleSaved: "ماژول '{id}' ذخیره شد.",
 		noticePasteJsonFirst: 'ابتدا JSON را وارد کنید.',
+		noticeJsonFileLoaded: "فایل '{name}' در باکس درون‌ریزی بارگذاری شد.",
 		noticeImportedWorkspace: 'ورک‌اسپیس وارد شد: {count} ماژول.',
 		noticeImportedModule: "ماژول '{id}' وارد شد (و S3 در صورت وجود).",
 		noticeImportedModules: '{count} ماژول وارد شد.',
@@ -1254,7 +1278,8 @@ function applyLanguage(lang: SupportedLang) {
 	setText('#mode-import-btn', t.modeImport);
 	setText('#mode-scratch-btn', t.modeScratch);
 	setText('#mode-import-panel h3', t.importPanelTitle);
-	setText('#mode-import-panel .muted', t.importPanelLead);
+	setText('#import-panel-lead', t.importPanelLead);
+	setText('label[for="module-import-file"] span', t.uploadJsonFile);
 	setText('label[for="module-import"] span', t.pasteJson);
 	setPlaceholder('#module-import', u.moduleImportPlaceholder);
 	setText('#import-module-btn', t.importButton);
@@ -1262,7 +1287,7 @@ function applyLanguage(lang: SupportedLang) {
 	setText('#export-workspace-btn-scratch', t.exportButton);
 	setText('#mode-scratch-panel h3:first-of-type', t.scratchPanelTitle);
 	setText('#mode-scratch-panel h3:nth-of-type(2)', t.fieldDraft);
-	setText('#mode-scratch-panel h3:nth-of-type(3)', t.s3Settings);
+	setText('#s3-settings-panel h3', t.s3Settings);
 	setText('label[for="module-id"] span', u.moduleId);
 	setText('label[for="module-name"] span', u.moduleName);
 	setText('label[for="module-description"] span', u.description);
@@ -1279,9 +1304,9 @@ function applyLanguage(lang: SupportedLang) {
 	setText('label[for="field-required"] span', u.required);
 	setText('#add-field-btn', u.addField);
 	setText('#clear-fields-btn', u.clearFields);
-	setText('#save-module-btn', u.saveModule);
+	updateModuleFormUi();
 	setText('#reset-module-btn', u.resetForm);
-	setText('#mode-scratch-panel .muted', u.s3UsedLead);
+	setText('#s3-settings-lead', u.s3UsedLead);
 	setText('#import-details-block summary', u.s3Credentials);
 	setText('label[for="settings-s3-bucket"] span', u.bucket);
 	setText('label[for="settings-s3-region"] span', u.region);
@@ -1592,6 +1617,12 @@ function bindEvents() {
 	byId<HTMLButtonElement>('save-module-btn').addEventListener('click', saveModule);
 	byId<HTMLButtonElement>('reset-module-btn').addEventListener('click', resetModuleForm);
 	byId<HTMLButtonElement>('import-module-btn').addEventListener('click', importModulesFromJson);
+	moduleImportFile.addEventListener('change', () => {
+		const file = moduleImportFile.files?.[0];
+		if (file) {
+			void loadImportJsonFromFile(file);
+		}
+	});
 	byId<HTMLButtonElement>('export-workspace-btn').addEventListener('click', exportWorkspaceToJsonBox);
 	byId<HTMLButtonElement>('export-workspace-btn-scratch').addEventListener('click', exportWorkspaceToJsonBox);
 	byId<HTMLButtonElement>('add-entry-btn').addEventListener('click', () => void addEntry());
@@ -1951,6 +1982,11 @@ function getFieldPresetLabel(presetId: FieldPresetId): string {
 	}
 }
 
+function updateModuleFormUi(): void {
+	const saveBtn = byId<HTMLButtonElement>('save-module-btn');
+	saveBtn.textContent = editingModuleId ? uiText().updateModule : uiText().saveModule;
+}
+
 function saveModule() {
 	const id = toId(moduleIdInput.value.trim() || moduleNameInput.value.trim());
 	const name = moduleNameInput.value.trim();
@@ -1976,9 +2012,20 @@ function saveModule() {
 
 	if (editingModuleId) {
 		const idx = modules.findIndex((module) => module.id === editingModuleId);
-		if (idx >= 0) {
-			modules[idx] = nextModule;
+		if (idx < 0) {
+			setNotice(tUi('noticeModuleNotFound'), 'error');
+			return;
 		}
+		if (id !== editingModuleId && modules.some((module) => module.id === id)) {
+			setNotice(tUi('noticeModuleExists', { id }), 'error');
+			return;
+		}
+		if (id !== editingModuleId) {
+			entries = entries.map((entry) =>
+				entry.moduleId === editingModuleId ? { ...entry, moduleId: id } : entry,
+			);
+		}
+		modules[idx] = nextModule;
 	} else {
 		if (modules.some((module) => module.id === id)) {
 			setNotice(tUi('noticeModuleExists', { id }), 'error');
@@ -2001,6 +2048,70 @@ function resetModuleForm() {
 	moduleDescriptionInput.value = '';
 	draftFields = [];
 	renderDraftFields();
+	updateModuleFormUi();
+}
+
+function applyImportedJson(parsed: unknown): void {
+	if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+		const envelope = parsed as Record<string, unknown>;
+
+		if (envelope.schemaVersion === WORKSPACE_EXPORT_VERSION && Array.isArray(envelope.modules)) {
+			const imported = (envelope.modules as unknown[]).map(parseImportedModule);
+			for (const module of imported) {
+				const existing = modules.findIndex((item) => item.id === module.id);
+				if (existing >= 0) {
+					modules[existing] = module;
+				} else {
+					modules.push(module);
+				}
+			}
+			if (envelope.s3Settings && typeof envelope.s3Settings === 'object') {
+				applyS3SettingsToForm(envelope.s3Settings as StoredS3Settings);
+				persistS3SettingsFromForm();
+			}
+			entries = entries.filter((entry) => modules.some((module) => module.id === entry.moduleId));
+			saveState();
+			renderAll();
+			setNotice(tUi('noticeImportedWorkspace', { count: imported.length }), 'ok');
+			return;
+		}
+
+		if (envelope.schemaVersion === MODULE_EXPORT_WRAP_VERSION && envelope.module) {
+			const module = parseImportedModule(envelope.module);
+			const existing = modules.findIndex((item) => item.id === module.id);
+			if (existing >= 0) {
+				modules[existing] = module;
+			} else {
+				modules.push(module);
+			}
+			if (envelope.s3Settings && typeof envelope.s3Settings === 'object') {
+				applyS3SettingsToForm(envelope.s3Settings as StoredS3Settings);
+				persistS3SettingsFromForm();
+			}
+			entries = entries.filter((entry) => modules.some((m) => m.id === entry.moduleId));
+			saveState();
+			renderAll();
+			setNotice(tUi('noticeImportedModule', { id: module.id }), 'ok');
+			return;
+		}
+	}
+
+	const list = Array.isArray(parsed) ? parsed : [parsed];
+	const imported = list.map(parseImportedModule);
+
+	for (const module of imported) {
+		const existing = modules.findIndex((item) => item.id === module.id);
+		if (existing >= 0) {
+			modules[existing] = module;
+		} else {
+			modules.push(module);
+		}
+	}
+
+	entries = entries.filter((entry) => modules.some((module) => module.id === entry.moduleId));
+	saveState();
+	renderAll();
+	setNotice(tUi('noticeImportedModules', { count: imported.length }), 'ok');
 }
 
 function importModulesFromJson() {
@@ -2011,70 +2122,24 @@ function importModulesFromJson() {
 	}
 
 	try {
-		const parsed = JSON.parse(raw) as unknown;
-
-		if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-			const envelope = parsed as Record<string, unknown>;
-
-			if (envelope.schemaVersion === WORKSPACE_EXPORT_VERSION && Array.isArray(envelope.modules)) {
-				const imported = (envelope.modules as unknown[]).map(parseImportedModule);
-				for (const module of imported) {
-					const existing = modules.findIndex((item) => item.id === module.id);
-					if (existing >= 0) {
-						modules[existing] = module;
-					} else {
-						modules.push(module);
-					}
-				}
-				if (envelope.s3Settings && typeof envelope.s3Settings === 'object') {
-					applyS3SettingsToForm(envelope.s3Settings as StoredS3Settings);
-					persistS3SettingsFromForm();
-				}
-				entries = entries.filter((entry) => modules.some((module) => module.id === entry.moduleId));
-				saveState();
-				renderAll();
-				setNotice(tUi('noticeImportedWorkspace', { count: imported.length }), 'ok');
-				return;
-			}
-
-			if (envelope.schemaVersion === MODULE_EXPORT_WRAP_VERSION && envelope.module) {
-				const module = parseImportedModule(envelope.module);
-				const existing = modules.findIndex((item) => item.id === module.id);
-				if (existing >= 0) {
-					modules[existing] = module;
-				} else {
-					modules.push(module);
-				}
-				if (envelope.s3Settings && typeof envelope.s3Settings === 'object') {
-					applyS3SettingsToForm(envelope.s3Settings as StoredS3Settings);
-					persistS3SettingsFromForm();
-				}
-				entries = entries.filter((entry) => modules.some((m) => m.id === entry.moduleId));
-				saveState();
-				renderAll();
-				setNotice(tUi('noticeImportedModule', { id: module.id }), 'ok');
-				return;
-			}
-		}
-
-		const list = Array.isArray(parsed) ? parsed : [parsed];
-		const imported = list.map(parseImportedModule);
-
-		for (const module of imported) {
-			const existing = modules.findIndex((item) => item.id === module.id);
-			if (existing >= 0) {
-				modules[existing] = module;
-			} else {
-				modules.push(module);
-			}
-		}
-
-		saveState();
-		renderAll();
-		setNotice(tUi('noticeImportedModules', { count: imported.length }), 'ok');
+		applyImportedJson(JSON.parse(raw) as unknown);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : tUi('noticeInvalidJson');
 		setNotice(message, 'error');
+	}
+}
+
+async function loadImportJsonFromFile(file: File): Promise<void> {
+	try {
+		const text = await file.text();
+		moduleImportInput.value = text;
+		applyImportedJson(JSON.parse(text) as unknown);
+		setNotice(tUi('noticeJsonFileLoaded', { name: file.name }), 'ok');
+	} catch (error) {
+		const message = error instanceof Error ? error.message : tUi('noticeInvalidJson');
+		setNotice(message, 'error');
+	} finally {
+		moduleImportFile.value = '';
 	}
 }
 
@@ -2156,13 +2221,17 @@ function handleModuleActions(event: Event) {
 	}
 
 	if (action === 'edit') {
+		setStartMode('scratch');
 		editingModuleId = module.id;
 		moduleIdInput.value = module.id;
 		moduleNameInput.value = module.name;
 		moduleDescriptionInput.value = module.description ?? '';
 		draftFields = [...module.fields];
 		renderDraftFields();
+		updateModuleFormUi();
 		setNotice(tUi('noticeEditingModule', { id: module.id }), 'info');
+		document.getElementById('mode-scratch-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		moduleIdInput.focus();
 		return;
 	}
 
